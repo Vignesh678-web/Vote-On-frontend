@@ -1,0 +1,49 @@
+.landing-container {
+  background: linear-gradient(120deg, #008037, #00c853);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  font-family: "Poppins", sans-serif;
+}
+
+.navbar {
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  margin: 0 1rem;
+  font-weight: 500;
+}
+
+.hero-section {
+  text-align: center;
+  margin-top: 10%;
+}
+
+.vote-btn {
+  background-color: white;
+  color: #008037;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.vote-btn:hover {
+  background-color: #e8f5e9;
+  transform: scale(1.05);
+}
