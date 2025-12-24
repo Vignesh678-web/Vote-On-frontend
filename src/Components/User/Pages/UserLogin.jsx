@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import "../Components/Styles/Login.css"
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 
@@ -8,9 +8,9 @@ export default function UserLogin() {
 
   const [activeTab, setActiveTab] = useState('student');
   const [formData, setFormData] = useState({
-    student: { admission_no: '', },
-    admin: { email: '', password: '', username: '' },
-    faculty: { faculty_id: '', password: '', rememberMe: false }
+    student: { admissionNumber: '', },
+    admin: { adminId: '', password: '' },
+    faculty: { facultyId: '', password: '', rememberMe: false }
   });
 
   const handleInputChange = (tab, field, value) => {
@@ -23,58 +23,89 @@ export default function UserLogin() {
     }));
   };
   const Navigate = useNavigate();
- const handleSubmit = (tab) => {
-  const data = formData[tab];
+  const handleSubmit = (tab) => {
+    const data = formData[tab];
 
-  // Student requires ONLY admission_no
-  if (tab === "student") {
-    if (!data.admission_no.trim()) {
-      alert("Admission number is required");
-      return; // stop login
+    // Student requires ONLY admissionNumber
+    if (tab === "student") {
+      if (!data.admissionNumber.trim()) {
+        alert("Admission number is required");
+        return; // stop login
+      }
     }
-  }
 
-  // Admin / Faculty require both ID + password
+    // Admin / Faculty require both ID + password
 
-  if (tab === "admin") {
-    if (!data.email.trim() || !data.password.trim()) {
-      alert("Admin ID, password and email are required");
+    if (tab === "admin") {
+      if (!data.adminId.trim() || !data.password.trim()) {
+        alert("Admin ID and password are required");
+        return;
+      }
+    }
+
+    if (tab === "faculty") {
+      if (!data.facultyId.trim() || !data.password.trim()) {
+        alert("Faculty ID and password are required");
+        return;
+      }
+    }
+    console.log(tab, "tab");
+
+    console.log(formData, "formData");
+
+
+    axios.post(`http://localhost:5000/api/${tab === "student" ? "auth/send-otp" : tab === "admin" ? "admin/auth/login" : "teacher/auth/login"}`, data)
+        .then((response) => {
+    console.log("LOGIN RESPONSE:", response.data);
+
+    // 🔐 HARD GUARD — NOTHING below runs unless success === true
+    if (!response.data || response.data.success !== true) {
+      alert(response.data?.message || "Login failed");
       return;
     }
-  }
 
-  if (tab === "faculty") {
-    if (!data.faculty_id.trim() || !data.password.trim()) {
-      alert("Faculty ID and password are required");
+    if (tab === "student") {
+      Navigate("/OtpLogin", {
+        state: { admissionNumber: data.admissionNumber },
+      });
       return;
     }
-  }
-console.log(tab,"tab");
 
-  console.log(formData,"formData");
-  
+    if (tab === "admin") {
+      // ✅ SAFE ACCESS
+      const email = response.data.admin?.email;
 
-  axios.post(`http://localhost:5000/api/${tab === "student" ? "auth/student-login" : tab === "admin" ? "admin/auth/create" : "teacher/auth/teacher-login"}`, data)
-    .then(response => {
-      console.log("Login successful:", response.data.admin.email);
-      // Navigate to respective dashboard
-      // if (tab === "student") {
-      //   Navigate("/student-dashboard");
-      // } else if (tab === "admin") {
-      //   Navigate("/Admindashboard");
-      // }
-      // else if (tab === "faculty") {
-      //   Navigate("/Teacherdashboard");
-      // }
-      Navigate("/OtpLogin" , { state: {email :response.data.admin.email  } } );
-    })
-    .catch(error => {
-      console.error("Login error:", error);
-      alert("Login failed. Please check your credentials.");
-    });
+      if (!email) {
+        alert("Admin email missing in response");
+        return;
+      }
+
+      Navigate("/OtpLogin", {
+        state: { email },
+      });
+      return;
+    }
+
+    if (tab === "faculty") {
+      Navigate("/OtpLogin", {
+        state: { facultyId: response.data.teacher?.facultyId },
+      });
+      return;   
+    }
+  })
+  .catch((error) => {
+    console.error("Axios error:", error);
+
+    alert(
+      error.response?.data?.message ||
+        error.message ||
+        "Something went wrong"
+    );
+  });
+
     // For demo, just navigate to OTP pa
-  // For demo, just navigate to OTP page
-};
+    // For demo, just navigate to OTP page
+  };
 
 
   const renderLoginForm = (tabType) => {
@@ -91,28 +122,33 @@ console.log(tab,"tab");
     };
 
     const placeholders = {
-      student: { admission_no: 'Enter your admission no', password: 'Enter your password' },
-      admin: { email: 'Enter EMAIL ID', password: 'Enter admin password', username: 'Enter Admin ID' },
-      faculty: { faculty_id: 'Enter faculty  ID', password: 'Enter faculty  password' }
+      student: { admissionNumber: 'Enter your admission no', },
+      admin: { adminId: 'Enter admin ID', password: 'Enter admin password' },
+      faculty: { facultyId: 'Enter faculty ID', password: 'Enter faculty password' }
     };
     const idField =
-      tabType === "student" ? "admission_no"
-      : tabType === "admin" ? "username"
-      : "faculty_id";
+      tabType === "student" ? "admissionNumber"
+        : tabType === "admin" ? "adminId"
+          : "facultyId";
 
     return (
       <div className="tab-content">
         <div className="form-header">
           <h2 className="form-title">{tabTitles[tabType]}</h2>
-
+          <input type='text'
+            id={`${tabType}-id`}
+            value={currentData[idField]}
+            onChange={(e) => handleInputChange(tabType, idField, e.target.value)}
+            className="form-input"
+            placeholder={placeholders[tabType][idField]}
+          />
         </div>
-
         <div className="form-content">
-       
+
 
 
           {/* Password Field */}
-       {tabType !== "student" && (
+          {tabType !== "student" && (
             <div className="form-field">
               <input
                 type="password"
@@ -124,21 +160,10 @@ console.log(tab,"tab");
               />
             </div>
           )}
-          {/* Email Field for Admin */} 
-          {tabType === "admin" && (
-            <div className="form-field">
-              <input
-                type="email"
-                id={`${tabType}-email`}   
-                value={currentData.email} 
-                onChange={(e) => handleInputChange(tabType, 'email', e.target.value)}
-                className="form-input"
-                placeholder={placeholders[tabType].email}
-              />
-            </div>
-          )}
-       
-           
+          {/* Email Field for Admin */}
+
+
+
 
           {/* Remember Me Checkbox */}
           <div className="checkbox-container">
@@ -151,7 +176,7 @@ console.log(tab,"tab");
             />
             <label htmlFor={`${tabType}-remember`} className="checkbox-label">
               Remember me
-              
+
             </label>
           </div>
 
@@ -165,12 +190,12 @@ console.log(tab,"tab");
           </button>
 
           {/* Footer Links */}
-         <div className="form-footer">
-      
-  <button type="button" className="forgot-password">
-    Forgot your password?
-  </button>
-</div>
+          <div className="form-footer">
+
+            <button type="button" className="forgot-password">
+              Forgot your password?
+            </button>
+          </div>
         </div>
       </div>
     );

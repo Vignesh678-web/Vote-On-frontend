@@ -17,7 +17,7 @@ export default function Layout({ activeSection, setActiveSection, children }) {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home size={20} /> },
     { id: "classvote", label: "Class Vote", icon: <Users size={20} /> },
-    { id: "parliamentvote", label: "College Vote", icon: <Crown size={20} /> },
+    { id: "College vote", label: "College Vote", icon: <Crown size={20} /> },
     { id: "candidates", label: "Candidates", icon: <ClipboardList size={20} /> },
     { id: "profile", label: "Profile", icon: <UserCircle2 size={20} /> },
   ];

@@ -2,12 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import "../Components/Styles/Otp.css"
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import { useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 const Otp = () => {
 
-const Navigate = useNavigate();
-     const location = useLocation();
-  const email = location.state?.email; 
+  const Navigate = useNavigate();
+  
+
+  const location = useLocation();
+  const email = location.state?.email;
+  const facultyId = location.state?.facultyId;
+
+console.log("OTP PAGE STATE:", location.state);
+console.log("EMAIL:", email);
+  const admissionNumber = location.state?.admissionNumber;
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -20,8 +27,8 @@ const Navigate = useNavigate();
       inputRefs.current[0].focus();
     }
   }, []);
-  console.log(email,'lllllllllllll');
-  
+  console.log(email, 'lllllllllllll');
+
 
   const handleChange = (index, value) => {
     // Only allow numbers
@@ -43,12 +50,12 @@ const Navigate = useNavigate();
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1].focus();
     }
-    
+
     // Move to next input on arrow right
     if (e.key === 'ArrowRight' && index < 5) {
       inputRefs.current[index + 1].focus();
     }
-    
+
     // Move to previous input on arrow left
     if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1].focus();
@@ -56,22 +63,23 @@ const Navigate = useNavigate();
 
     // Submit on Enter if all fields are filled
     if (e.key === 'Enter' && otp.every(digit => digit !== '')) {
-      handleVerify();
+      handleOtpSubmit();
     }
+
   };
 
   const handlePaste = (e) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData('text');
     const pasteDigits = pasteData.replace(/\D/g, '').slice(0, 6);
-    
+
     if (pasteDigits.length > 0) {
       const newOtp = [...otp];
       for (let i = 0; i < 6; i++) {
         newOtp[i] = pasteDigits[i] || '';
       }
       setOtp(newOtp);
-      
+
       // Focus on the last filled input or first empty one
       const lastFilledIndex = Math.min(pasteDigits.length - 1, 5);
       inputRefs.current[lastFilledIndex].focus();
@@ -80,43 +88,85 @@ const Navigate = useNavigate();
 
  const handleVerify = async () => {
   const otpString = otp.join('');
+
   if (otpString.length !== 6) {
     setError('Please enter all 6 digits');
     return;
   }
 
-  setIsVerifying(true);
-  setError('');
-
   try {
     const response = await axios.post(
       "http://localhost:5000/api/admin/auth/verify-ottp",
       {
-        email : email, 
+        email,
         otp: otpString
       }
     );
 
-    // If backend responds with success
-    if (response.data.success === true) {
-      console.log("otp verified");
+    if (response.status === 200 && response.data.success) {
       Navigate("/Admindashboard");
-    } else {
-      throw new Error(response.data?.message || "Verification failed");
     }
 
-
-    console.log(email,"emaillllllllllllllllllllllllllll");
-    
   } catch (err) {
-    // handle errors from backend
     setError(err.response?.data?.message || err.message);
-    setOtp(['', '', '', '', '', '']);
-    inputRefs.current[0].focus();
-  } finally {
-    setIsVerifying(false);
   }
 };
+
+const handleStudentVerify = async () => {
+  const otpString = otp.join('');
+
+  if (otpString.length !== 6) {
+    setError('Please enter all 6 digits');
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/auth/verify-otp",
+      { admissionNumber, otp: otpString }
+    );
+
+    if (response.status === 200) {
+      Navigate("/Studentdashboard");
+    }
+
+  } catch (err) {
+    setError(err.response?.data?.message || err.message);
+  }
+};
+
+ const handleFacultyVerify = async () => {
+    const otpString = otp.join('');
+    if (otpString.length !== 6) {
+      setError('Please enter all 6 digits');
+      return;
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/teacher/auth/verify-otp",
+        { facultyId, otp: otpString }
+      );    
+      if (response.status === 200 && response.data.success) {
+        Navigate("/teacherDashboard");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    } 
+  };
+
+
+  const handleOtpSubmit = () => {
+    if (admissionNumber) {
+      handleStudentVerify();
+    } else if (facultyId) {
+      handleFacultyVerify();
+    }
+    else {
+      handleVerify();
+    } 
+  };
+
+
 
   const handleResend = () => {
     setOtp(['', '', '', '', '', '']);
@@ -141,18 +191,18 @@ const Navigate = useNavigate();
           <div className="otp-icon">
             <div className='logocontainer'>
               <div className='logo'>
-            {isVerified ? '' : ''}
+                {isVerified ? '' : ''}
+              </div>
             </div>
-          </div>
-          <h1 className="otp-title">
-            {isVerified ? 'Verified!' : 'Enter OTP'}
-          </h1>
-          <p className="otp-subtitle">
-            {isVerified 
-              ? 'Your phone number has been verified successfully'
-              : 'We sent a 6-digit code to your phone number'
-            }
-          </p>
+            <h1 className="otp-title">
+              {isVerified ? 'Verified!' : 'Enter OTP'}
+            </h1>
+            <p className="otp-subtitle">
+              {isVerified
+                ? 'Your phone number has been verified successfully'
+                : 'We sent a 6-digit code to your phone number'
+              }
+            </p>
           </div>
         </div>
 
@@ -183,10 +233,12 @@ const Navigate = useNavigate();
             )}
 
             <button
-              onClick={handleVerify}
+              onClick={handleOtpSubmit}
               disabled={isVerifying || otp.some(digit => digit === '')}
-              className={`otp-button otp-button-primary ${isVerifying || otp.some(digit => digit === '') ? 'otp-button-disabled' : ''}`}
+              className={`otp-button otp-button-primary ${isVerifying || otp.some(digit => digit === '') ? 'otp-button-disabled' : ''
+                }`}
             >
+
               {isVerifying ? (
                 <span className="otp-loader">
                   <span className="otp-spinner"></span>

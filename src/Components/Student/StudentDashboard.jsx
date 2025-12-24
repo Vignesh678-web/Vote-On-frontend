@@ -4,6 +4,9 @@ import Elections from "./Components/Elections/Elections";
 import Candidates from "./Components/Candidates/Candidate";
 import Profile from "./Components/Profile/Profile";
 import Layout from "./Components/Layout/Layout";
+import Votingpage from "./Pages/VotePage";
+
+
 export default function StudentDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
 
@@ -12,10 +15,13 @@ export default function StudentDashboard() {
     switch (activeSection) {
       case "dashboard":
         return <DashboardHome />;
+        case "classvote":
+        return <Votingpage />;
       case "elections":
         return <Elections />;
       case "candidates":
         return <Candidates />;
+
       case "profile":
         return <Profile />;
       default:
