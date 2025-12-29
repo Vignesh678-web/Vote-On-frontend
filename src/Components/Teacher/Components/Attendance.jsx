@@ -1,6 +1,9 @@
 // components/Attendance.jsx
 import React from 'react';
-import { Percent, BarChart3, CheckCircle, XCircle, Edit2, Save } from 'lucide-react';
+import { Percent, CheckCircle, XCircle, Edit2, Save } from 'lucide-react';
+import axios from 'axios';
+import {useState, useEffect} from 'react';
+
 
 const Attendance = ({ 
   classInfo = { className: "Unknown Class" }, 
@@ -35,53 +38,12 @@ const Attendance = ({
 
           <div className="px-5 py-3 bg-green-500/10 border border-green-500/40 rounded-xl">
             <p className="text-sm text-green-400 font-bold flex items-center gap-2">
-               Min 75% for eligibility
+               Minimum 75% for eligibility
             </p>
           </div>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="bg-gray-900 rounded-xl p-6 border border-green-500/30">
-        <h4 className="font-bold text-white mb-6 flex items-center gap-3 text-lg">
-          <BarChart3 className="w-6 h-6 text-green-400" /> Attendance Distribution
-        </h4>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Excellent */}
-          <div className="text-center p-5 bg-black/40 rounded-xl border border-green-500/40">
-            <div className="w-16 h-16 mx-auto mb-3 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/50">
-              <span className="text-3xl text-green-400 font-black">
-                {students.filter(s => s?.attendance >= 90).length}
-              </span>
-            </div>
-            <p className="text-white font-bold text-sm">Excellent</p>
-            <p className="text-green-400 text-xs">≥90%</p>
-          </div>
-
-          {/* Good */}
-          <div className="text-center p-5 bg-black/40 rounded-xl border border-blue-500/40">
-            <div className="w-16 h-16 mx-auto mb-3 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/50">
-              <span className="text-3xl text-blue-400 font-black">
-                {students.filter(s => s?.attendance >= 75 && s?.attendance < 90).length}
-              </span>
-            </div>
-            <p className="text-white font-bold text-sm">Good</p>
-            <p className="text-blue-400 text-xs">75–89%</p>
-          </div>
-
-          {/* Below */}
-          <div className="text-center p-5 bg-black/40 rounded-xl border border-red-500/40">
-            <div className="w-16 h-16 mx-auto mb-3 bg-red-500/20 rounded-full flex items-center justify-center border border-red-500/50">
-              <span className="text-3xl text-red-400 font-black">
-                {students.filter(s => s?.attendance < 75).length}
-              </span>
-            </div>
-            <p className="text-white font-bold text-sm">Below</p>
-            <p className="text-red-400 text-xs">&lt;75%</p>
-          </div>
-        </div>
-      </div>
 
       {/* Attendance Table */}
       <div className="bg-gray-900 rounded-xl shadow-sm p-6 border border-green-500/30">

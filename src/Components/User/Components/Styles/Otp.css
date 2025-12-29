@@ -182,6 +182,13 @@
   gap: 8px;
 }
 
+.otp-valid{
+  margin-top: 10px;
+  font-size: 14px;
+  color: #d3d6dc;
+  font-style: italic;
+}
+
 .otp-spinner {
   width: 16px;
   height: 16px;

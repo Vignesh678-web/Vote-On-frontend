@@ -3,6 +3,7 @@ import "../Components/Styles/Otp.css"
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+
 const Otp = () => {
 
   const Navigate = useNavigate();
@@ -10,7 +11,7 @@ const Otp = () => {
 
   const location = useLocation();
   const email = location.state?.email;
-  const facultyId = location.state?.facultyId;
+ 
 
 console.log("OTP PAGE STATE:", location.state);
 console.log("EMAIL:", email);
@@ -122,12 +123,12 @@ const handleStudentVerify = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/auth/verify-otp",
+      "http://localhost:5000/api/student/verify-otp",
       { admissionNumber, otp: otpString }
     );
 
     if (response.status === 200) {
-      Navigate("/Studentdashboard");
+      Navigate("/UserLogin");
     }
 
   } catch (err) {
@@ -200,7 +201,7 @@ const handleStudentVerify = async () => {
             <p className="otp-subtitle">
               {isVerified
                 ? 'Your phone number has been verified successfully'
-                : 'We sent a 6-digit code to your phone number'
+                : 'We sent a 6-digit code to your email address.'
               }
             </p>
           </div>
@@ -248,6 +249,9 @@ const handleStudentVerify = async () => {
                 'Verify OTP'
               )}
             </button>
+            <div className='otp-valid'>
+              <p>OTP is valid for 5 minutes</p>
+            </div>
 
             <div className="otp-resend-container">
               <p className="otp-resend-text">Didn't receive the code?</p>
