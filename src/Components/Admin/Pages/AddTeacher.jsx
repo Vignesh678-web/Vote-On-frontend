@@ -3,14 +3,14 @@ import { UserPlus } from 'lucide-react';
 
 const AddTeacher = ({ onAddTeacher }) => {
   const [facultyId, setFacultyId] = useState('');
-  const [name, setName] = useState('');
+  const [Name, setName] = useState('');
   const [department, setDepartment] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
   const handleSubmit = () => {
-    if (facultyId && name && department && password) {
-      onAddTeacher({ facultyId, name, department, password,email });
+    if (facultyId && Name && department && password) {
+      onAddTeacher({ facultyId, Name, department, password,email });
       setFacultyId('');
       setName('');
       setDepartment('');
@@ -39,7 +39,7 @@ const AddTeacher = ({ onAddTeacher }) => {
           <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
           <input
             type="text"
-            value={name}
+            value={Name}
             onChange={(e) => setName(e.target.value)}
             className="w-full bg-gray-800 border border-green-500/50 rounded px-3 py-2 text-gray-100 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
             placeholder="Enter Name"

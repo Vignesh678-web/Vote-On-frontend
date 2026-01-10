@@ -34,22 +34,22 @@ const FacultyList = ({ teachers, onToggleBlock }) => (
               <p className="text-sm text-gray-500">{teacher.department}</p>
             </div>
             <button
-              onClick={() => onToggleBlock(teacher.facultyId || teacher.id)}
+              onClick={() => onToggleBlock(teacher._id)}
               className={`flex items-center gap-2 font-semibold py-2 px-4 rounded transition-colors ${
                 teacher.status === "Blocked"
                   ? "bg-green-500 hover:bg-green-600 text-black"
                   : "bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30"
               }`}
             >
-              {teacher.status === "Blocked" ? (
+              {teacher.isBlocked === false ? (
                 <>
                   <CheckCircle className="w-4 h-4" />
-                  Unblock
+                  BLOCK
                 </>
               ) : (
                 <>
                   <Ban className="w-4 h-4" />
-                  Block
+                  UNBLOCK
                 </>
               )}
             </button>

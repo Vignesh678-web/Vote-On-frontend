@@ -100,81 +100,91 @@ export default function UserLogin() {
       });
   };
 
-  const handleSubmit = (tab) => {
+  const handleSubmit = async (tab) => {
     const data = formData[tab];
 
-    if (tab === "student") {
-      if (!data.admissionNumber.trim() || !data.password.trim()) {
-        alert("Admission number and password are required");
-        return;
-      }
+    // Basic validation
+    if (tab === "student" && (!data.admissionNumber || !data.password)) {
+      alert("Admission number and password are required");
+      return;
     }
 
-    if (tab === "admin") {
-      if (!data.adminId.trim() || !data.password.trim()) {
-        alert("Admin ID and password are required");
-        return;
-      }
+    if (tab === "admin" && (!data.adminId || !data.password)) {
+      alert("Admin ID and password are required");
+      return;
     }
 
-    if (tab === "faculty") {
-      if (!data.facultyId.trim() || !data.password.trim()) {
-        alert("Faculty ID and password are required");
-        return;
-      }
+    if (tab === "faculty" && (!data.facultyId || !data.password)) {
+      alert("Faculty ID and password are required");
+      return;
     }
-    console.log(tab, "tab");
-    console.log(formData, "formData");
 
-    axios.post(
-      `http://localhost:5000/api/${activeTab === "student"
-        ? "student/login"
-        : activeTab === "admin"
-          ? "admin/auth/login"
-          : "teacher/auth/login"
-      }`,
-      data
-    )
-      .then((response) => {
-        console.log("LOGIN RESPONSE:", response.data);
+    // Correct endpoint mapping
+    const urlMap = {
+      student: "http://localhost:5000/api/student/login",
+      admin: "http://localhost:5000/api/admin/auth/login",
+      faculty: "http://localhost:5000/api/teacher/auth/login",
+    };
 
-        if (!response.data || response.data.message !== "Login successful") {
-  alert(response.data?.message || "Login failed");
-  return;
+   try {
+  const response = await axios.post(urlMap[tab], data);
+  const res = response.data;
+
+  console.log("LOGIN RESPONSE:", res);
+
+  if (!res || res.success === false) {
+    alert(res?.message || "Login failed");
+    return;
+  }
+
+  // 🔐 SAVE TOKEN (UNIVERSAL)
+  if (!res.token) {
+    alert("No token received from server");
+    return;
+  }
+
+  localStorage.setItem("token", res.token);
+  localStorage.setItem("role", tab);
+
+  // OPTIONAL: save user info safely
+  if (tab === "student" && res.student) {
+    localStorage.setItem("user", JSON.stringify(res.student));
+  }
+
+  if (tab === "admin" && res.admin) {
+    localStorage.setItem("user", JSON.stringify(res.admin));
+  }
+
+  if (tab === "faculty" && res.faculty) {
+    localStorage.setItem("user", JSON.stringify(res.faculty));
+  }
+
+  // ---- REDIRECTS ----
+  if (tab === "student") {
+    navigate("/studentDashboard");
+    return;
+  }
+
+  if (tab === "admin") {
+    navigate("/adminDashboard");
+    return;
+  }
+
+  if (tab === "faculty") {
+    navigate("/teacherDashboard");
+    return;
+  }
+
+} catch (error) {
+  console.error("Login error:", error);
+  alert(
+    error.response?.data?.message ||
+    error.message ||
+    "Something went wrong"
+  );
 }
 
-
-        if (activeTab === "student") {
-          navigate("/StudentDashboard", {
-            state: { admissionNumber: data.admissionNumber, password: data.password },
-          });
-          return;
-        }
-
-        if (activeTab === "admin") {
-          const email = response.data.admin?.email;
-          if (!email) {
-            alert("Admin email missing in response");
-            return;
-          }
-          navigate("/OtpLogin", { state: { email } });
-          return;
-        }
-
-        if (activeTab === "faculty") {
-          navigate("/OtpLogin", {
-            state: { facultyId: response.data.teacher?.facultyId },
-          });
-          return;
-        }
-      })
-      .catch((error) => {
-        console.error("Axios error:", error);
-        alert(error.response?.data?.message || error.message || "Something went wrong");
-      });
-
   };
-
   const renderRegistrationForm = () => {
     return (
       <div className="tab-content">
@@ -240,12 +250,12 @@ export default function UserLogin() {
           <div className='form-field'>
             {/* section field */}
             <input type=
-            "text"
-            value={registrationData.section}
-            onChange={(e) => handleRegistrationChange('section', e.target.value)}
-            className="form-input"
-            placeholder="Enter your section"
-          />
+              "text"
+              value={registrationData.section}
+              onChange={(e) => handleRegistrationChange('section', e.target.value)}
+              className="form-input"
+              placeholder="Enter your section"
+            />
           </div>
 
           {/* Register Button */}
