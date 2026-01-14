@@ -10,9 +10,57 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
   const [showNominationModal, setShowNominationModal] = useState(false);
   const [position, setPosition] = useState("");
 
-  const handleNominateCandidate =
-    onNominateCandidate ||
-    (() => console.warn("onNominateCandidate function not provided"));
+  const handleNominate = (student) => {
+    if (!student.eligible) {
+      alert("This student is not eligible (attendance < 75%)");
+      return;
+    }
+
+    setSelectedStudent(student);
+    setShowNominationModal(true);
+  };
+
+  const submitNomination = async () => {
+    if (!position.trim()) {
+      alert("Please enter a position");
+      return;
+    }
+
+    if (!selectedStudent) {
+      alert("No student selected");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post(
+        "http://localhost:5000/api/teacher/nominate",
+        {
+          studentId: selectedStudent.id, // IMPORTANT
+          position,
+          manifesto: "",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setShowNominationModal(false);
+      setSelectedStudent(null);
+      setPosition("");
+
+      alert("Student nominated successfully. Awaiting admin approval.");
+    } catch (err) {
+      console.error("Nomination failed:", err);
+      alert(
+        err.response?.data?.message || "Failed to nominate student"
+      );
+    }
+  };
+
 
   // -------- FETCH STUDENTS FROM BACKEND --------
   useEffect(() => {
@@ -21,16 +69,34 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
 
   const fetchStudents = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/teacher/students");
-      const dbStudents = res.data.students || [];
+      const token = localStorage.getItem("token");
 
-      const formatted = dbStudents.map((s) => ({
-        id: s._id,
-        name: `${s.name}`,
-        admission: s.admissionNumber,
-        attendance: s.attendance,
-        eligible: s.attendance >= 75
-      }));
+      const res = await axios.get(
+        "http://localhost:5000/api/teacher/students",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // BACKEND RETURNS ARRAY
+      if (!Array.isArray(res.data)) {
+        throw new Error("Invalid students response");
+      }
+
+      const formatted = res.data.map((s) => {
+        const attendance =
+          typeof s.attendence === "number" ? s.attendence : 0;
+
+        return {
+          id: s._id,
+          name: s.name,
+          admission: s.admissionNumber,
+          attendance,                 // normalized
+          eligible: attendance >= 75, // correct logic
+        };
+      });
 
       setStudents(formatted);
     } catch (err) {
@@ -39,36 +105,6 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
     }
   };
 
-  // -------- NOMINATION HANDLING --------
-  const handleNominate = (student) => {
-    if (!student.eligible) {
-      alert("This student is not eligible (attendance < 75%)");
-      return;
-    }
-    setSelectedStudent(student);
-    setShowNominationModal(true);
-  };
-
-  const submitNomination = () => {
-    if (!position.trim()) return alert("Please enter a position");
-    if (!selectedStudent) return alert("No student selected");
-
-    handleNominateCandidate({
-      id: `cand-${Date.now()}`,
-      name: selectedStudent.name,
-      admission: selectedStudent.admission,
-      attendance: selectedStudent.attendance,
-      position,
-      status: "pending"
-    });
-
-    setShowNominationModal(false);
-    setSelectedStudent(null);
-    setPosition("");
-    alert("Student nominated successfully!");
-  };
-
-  // -------- FILTER STUDENTS --------
   const filteredStudents = students.filter((s) => {
     if (activeFilter === "eligible") return s.eligible;
     if (activeFilter === "ineligible") return !s.eligible;
@@ -92,33 +128,30 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
       <div className="flex gap-3">
         <button
           onClick={() => setActiveFilter("all")}
-          className={`px-5 py-2.5 rounded-xl ${
-            activeFilter === "all"
+          className={`px-5 py-2.5 rounded-xl ${activeFilter === "all"
               ? "bg-green-600 text-black"
               : "bg-gray-800 text-gray-400"
-          }`}
+            }`}
         >
           All ({students.length})
         </button>
 
         <button
           onClick={() => setActiveFilter("eligible")}
-          className={`px-5 py-2.5 rounded-xl ${
-            activeFilter === "eligible"
+          className={`px-5 py-2.5 rounded-xl ${activeFilter === "eligible"
               ? "bg-green-600 text-black"
               : "bg-gray-800 text-gray-400"
-          }`}
+            }`}
         >
           Eligible ({students.filter((s) => s.eligible).length})
         </button>
 
         <button
           onClick={() => setActiveFilter("ineligible")}
-          className={`px-5 py-2.5 rounded-xl ${
-            activeFilter === "ineligible"
+          className={`px-5 py-2.5 rounded-xl ${activeFilter === "ineligible"
               ? "bg-red-600 text-white"
               : "bg-gray-800 text-gray-400"
-          }`}
+            }`}
         >
           Ineligible ({students.filter((s) => !s.eligible).length})
         </button>
@@ -152,16 +185,16 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
                 <td className="px-6 py-4">
                   <button
                     onClick={() => handleNominate(student)}
-                    disabled={!student.eligible}
-                    className={`px-4 py-2 rounded-lg ${
-                      student.eligible
+                    disabled={!student.eligible || student.nominated}
+                    className={`px-4 py-2 rounded-lg ${student.eligible && !student.nominated
                         ? "bg-purple-600 text-white"
                         : "bg-gray-700 text-gray-500"
-                    }`}
+                      }`}
                   >
                     <Award className="w-4 h-4 inline-block mr-1" />
-                    Nominate
+                    {student.nominated ? "Nominated" : "Nominate"}
                   </button>
+
                 </td>
               </tr>
             ))}

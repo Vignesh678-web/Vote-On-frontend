@@ -1,11 +1,51 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Check, X } from "lucide-react";
+import { useEffect } from "react";
+
+
 
 const CandidateApproval = ({ initialCandidates = [] }) => {
   const [candidates, setCandidates] = useState(initialCandidates);
   const [activeTab, setActiveTab] = useState("pending");
   const [loadingId, setLoadingId] = useState(null);
+
+  useEffect(() => {
+  fetchCandidates();
+  }, []);
+
+
+  const fetchCandidates = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      "http://localhost:5000/api/admin/candidates/get-candidates",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!Array.isArray(res.data)) {
+      throw new Error("Invalid candidates response");
+    }
+
+    setCandidates(res.data);
+  } catch (err) {
+  console.error("Fetch candidates error:", err);
+  console.error("Response:", err.response);
+  console.error("Message:", err.message);
+
+  setError(
+    err.response?.data?.message ||
+    err.message ||
+    "Failed to load candidates"
+  );
+}
+  }
+
 
   // APPROVE
   const handleApprove = async (studentId) => {
@@ -17,12 +57,13 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
       );
 
       setCandidates(prev =>
-        prev.map(c =>
-          c._id === studentId
-            ? { ...c, status: "approved" }
-            : c
-        )
-      );
+  prev.map(c =>
+    c._id === studentId
+      ? { ...c, isApproved: true, electionStatus: "Active" }
+      : c
+  )
+);
+
     } catch (err) {
       alert(err.response?.data?.message || "Approval failed");
     } finally {
@@ -52,11 +93,26 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
       setLoadingId(null);
     }
   };
+    
+  
 
   // FILTER BY STATUS
-  const filteredCandidates = candidates.filter(
-    c => c.status === activeTab
-  );
+  const filteredCandidates = candidates.filter((c) => {
+  if (activeTab === "pending") {
+    return c.iscandidate === true && c.isApproved === false;
+  }
+
+  if (activeTab === "approved") {
+    return c.iscandidate === true && c.isApproved === true;
+  }
+
+  if (activeTab === "rejected") {
+    return c.electionStatus === "Rejected"; // only if backend supports it
+  }
+
+  return true;
+});
+
 
   return (
     <div className="p-6 bg-gray-900 rounded-xl border border-gray-800">

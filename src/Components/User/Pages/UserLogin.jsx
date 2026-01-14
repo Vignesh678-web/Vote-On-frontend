@@ -126,63 +126,63 @@ export default function UserLogin() {
       faculty: "http://localhost:5000/api/teacher/auth/login",
     };
 
-   try {
-  const response = await axios.post(urlMap[tab], data);
-  const res = response.data;
+    try {
+      const response = await axios.post(urlMap[tab], data);
+      const res = response.data;
 
-  console.log("LOGIN RESPONSE:", res);
+      console.log("LOGIN RESPONSE:", res);
 
-  if (!res || res.success === false) {
-    alert(res?.message || "Login failed");
-    return;
-  }
+      if (!res || res.success === false) {
+        alert(res?.message || "Login failed");
+        return;
+      }
 
-  // 🔐 SAVE TOKEN (UNIVERSAL)
-  if (!res.token) {
-    alert("No token received from server");
-    return;
-  }
+      // 🔐 SAVE TOKEN (UNIVERSAL)
+      if (!res.token) {
+        alert("No token received from server");
+        return;
+      }
 
-  localStorage.setItem("token", res.token);
-  localStorage.setItem("role", tab);
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("role", tab);
 
-  // OPTIONAL: save user info safely
-  if (tab === "student" && res.student) {
-    localStorage.setItem("user", JSON.stringify(res.student));
-  }
+      // OPTIONAL: save user info safely
+      if (tab === "student" && res.student) {
+        localStorage.setItem("user", JSON.stringify(res.student));
+      }
 
-  if (tab === "admin" && res.admin) {
-    localStorage.setItem("user", JSON.stringify(res.admin));
-  }
+      if (tab === "admin" && res.admin) {
+        localStorage.setItem("user", JSON.stringify(res.admin));
+      }
 
-  if (tab === "faculty" && res.faculty) {
-    localStorage.setItem("user", JSON.stringify(res.faculty));
-  }
+      if (tab === "faculty" && res.faculty) {
+        localStorage.setItem("user", JSON.stringify(res.faculty));
+      }
 
-  // ---- REDIRECTS ----
-  if (tab === "student") {
-    navigate("/studentDashboard");
-    return;
-  }
+      // ---- REDIRECTS ----
+      if (tab === "student") {
+        navigate("/studentDashboard");
+        return;
+      }
 
-  if (tab === "admin") {
-    navigate("/adminDashboard");
-    return;
-  }
+      if (tab === "admin") {
+        navigate("/adminDashboard");
+        return;
+      }
 
-  if (tab === "faculty") {
-    navigate("/teacherDashboard");
-    return;
-  }
+      if (tab === "faculty") {
+        navigate("/teacherDashboard");
+        return;
+      }
 
-} catch (error) {
-  console.error("Login error:", error);
-  alert(
-    error.response?.data?.message ||
-    error.message ||
-    "Something went wrong"
-  );
-}
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong"
+      );
+    }
 
   };
   const renderRegistrationForm = () => {

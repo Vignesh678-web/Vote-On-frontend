@@ -25,7 +25,7 @@ const Sidebar = ({
 
   const menuItems = [
     { id: "overview", label: "Overview", icon: Home, description: "Dashboard overview" },
-    { id: "students", label: "My Class Students", icon: Users, description: "Manage student data" },
+    { id: "students", label: " Class Students", icon: Users, description: "Manage student data" },
     { id: "attendance", label: "Manage Attendance", icon: Percent, description: "Track attendance" },
     { id: "candidates", label: "Candidates", icon: Award, description: "Election candidates",
       badge: safeCandidates.filter(c => c.status === "pending").length },
