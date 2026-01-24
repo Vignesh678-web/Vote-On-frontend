@@ -2,8 +2,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { UserCheck, Percent, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+
+
 
 const Candidates = () => {
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,12 +54,21 @@ const Candidates = () => {
         throw new Error("Invalid candidates response");
       }
 
-      const normalized = rawCandidates.map((c) => ({
-        id: c._id,
-        name: c.name,
-        position: c.position,
-        attendance: c.attendence ?? 0,
-      }));
+      const normalized = rawCandidates.map((c) => {
+        const manifestoArray = Array.isArray(c.manifestoPoints)
+          ? c.manifestoPoints.filter(Boolean)
+          : [];
+
+        return {
+          id: c._id,
+          name: c.name,
+          position: c.position,
+          attendance: c.attendence ?? 0,
+          candidateBio: c.candidateBio?.trim() || "",
+          manifestoPoints: manifestoArray,
+          photoUrl: c.photoUrl?.trim() || "",
+        };
+      });
 
 
       setCandidates(normalized);
@@ -147,6 +161,17 @@ const Candidates = () => {
     );
   }
 
+
+
+  const isCandidateIncomplete = (candidate) => {
+    return (
+      !candidate.candidateBio ||
+      candidate.manifestoPoints.length === 0 ||
+      !candidate.photoUrl
+    );
+  };
+
+
   return (
     <div
       className="min-h-screen bg-black p-6 space-y-6"
@@ -186,8 +211,10 @@ const Candidates = () => {
           {candidates.map((candidate) => (
             <div
               key={candidate.id}
-              className="bg-gray-900 border border-green-500/30 rounded-xl p-6"
+              onClick={() => navigate(`/candidates/${candidate.id}`)}
+              className="bg-gray-900 border border-green-500/30 rounded-xl p-6 cursor-pointer hover:border-green-400 transition"
             >
+
               <div className="flex flex-col md:flex-row justify-between gap-4">
                 <div>
                   <h4 className="font-bold text-white text-lg">
@@ -206,21 +233,21 @@ const Candidates = () => {
                 </div>
 
                 <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={() => {
-                      setSelectedCandidate(candidate);
-                      setCandidateBio(candidate.candidateBio || "");
-                      setManifestoPoints(
-                        Array.isArray(candidate.manifestoPoints)
-                          ? candidate.manifestoPoints.join("\n")
-                          : ""
-                      );
-                      setIsModalOpen(true);
-                    }}
-                    className="text-sm  text-purple-400 hover:text-purple-300 underline"
-                  >
-                    Add / Edit
-                  </button>
+                  {isCandidateIncomplete(candidate) && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCandidate(candidate);
+                        setCandidateBio(candidate.candidateBio);
+                        setManifestoPoints(candidate.manifestoPoints.join("\n"));
+                        setIsModalOpen(true);
+                      }}
+                      className="text-sm text-purple-400 hover:text-purple-300 underline"
+                    >
+                      Add Details
+                    </button>
+                  )}
+
                 </div>
 
 

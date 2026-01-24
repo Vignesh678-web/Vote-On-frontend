@@ -3,13 +3,16 @@ import React from "react";
 import { UserX, CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 const QuickStatsGrid = ({ candidates, students }) => {
+  // Get candidate IDs to exclude them from ineligible count
+  const candidateIds = candidates.map(c => c.id);
+  
   const stats = [
     {
       icon: UserX,
       label: "Ineligible Students",
-      value: students.filter((s) => !s.eligible).length,
+      value: students.filter((s) => !s.eligible && !candidateIds.includes(s._id)).length,
       color: "text-red-400 border-red-500/30 bg-red-500/10",
-      description: "Low attendance",
+      description: "Low attendance (non-candidates)",
     },
     {
       icon: CheckCircle,

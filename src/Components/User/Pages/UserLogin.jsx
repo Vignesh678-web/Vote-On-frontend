@@ -144,19 +144,26 @@ export default function UserLogin() {
       }
 
       localStorage.setItem("token", res.token);
-      localStorage.setItem("role", tab);
+      const roleMap = {
+        student: "student",
+        admin: "admin",
+        faculty: "teacher"
+      };
+
+      localStorage.setItem("role", roleMap[tab]);
+
 
       // OPTIONAL: save user info safely
       if (tab === "student" && res.student) {
-        localStorage.setItem("user", JSON.stringify(res.student));
+        localStorage.setItem("student", JSON.stringify(res.student));
       }
 
       if (tab === "admin" && res.admin) {
-        localStorage.setItem("user", JSON.stringify(res.admin));
+        localStorage.setItem("admin", JSON.stringify(res.admin));
       }
 
-      if (tab === "faculty" && res.faculty) {
-        localStorage.setItem("user", JSON.stringify(res.faculty));
+      if (tab === "faculty" && res.teacher) {
+        localStorage.setItem("teacher", JSON.stringify(res.teacher));
       }
 
       // ---- REDIRECTS ----

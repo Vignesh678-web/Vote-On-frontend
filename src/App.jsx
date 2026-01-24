@@ -7,6 +7,8 @@ import StudentDashboard from './Components/Student/StudentDashboard'
 import VotePage from './Components/Student/Pages/VotePage' 
 import AdminDashboard from './Components/Admin/Pages/AdminDashboard'
 import LandingPage from './Components/LandingPage/Pages/LandingPage'
+import CandidateDetails from './Components/Teacher/Components/CandidateDetails'
+
 
 function App() {
   return (
@@ -20,7 +22,8 @@ function App() {
         <Route path="/VotePage" element={<VotePage />} /> 
         <Route path="/adminDashboard" element={<AdminDashboard />} />
         <Route path='/LandingPage' element={<LandingPage />} />
-        
+        <Route path="/candidates/:studentId" element={<CandidateDetails  />} />
+
         
       </Routes>
     </>

@@ -21,6 +21,27 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
   };
 
   const submitNomination = async () => {
+
+    const nominated = JSON.parse(localStorage.getItem("nominatedStudents")) || [];
+
+    if (!nominated.includes(selectedStudent.id)) {
+      nominated.push(selectedStudent.id);
+      localStorage.setItem(
+        "nominatedStudents",
+        JSON.stringify(nominated)
+      );
+    }
+
+
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.id === selectedStudent.id
+          ? { ...s, nominated: true }
+          : s
+      )
+    );
+
+
     if (!position.trim()) {
       alert("Please enter a position");
       return;
@@ -85,6 +106,9 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
         throw new Error("Invalid students response");
       }
 
+      const nominated =
+        JSON.parse(localStorage.getItem("nominatedStudents")) || [];
+
       const formatted = res.data.map((s) => {
         const attendance =
           typeof s.attendence === "number" ? s.attendence : 0;
@@ -93,10 +117,13 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
           id: s._id,
           name: s.name,
           admission: s.admissionNumber,
-          attendance,                 // normalized
-          eligible: attendance >= 75, // correct logic
+          attendance,
+          eligible: attendance >= 75,
+          nominated: nominated.includes(s._id), // 👈 frontend-only truth
         };
       });
+
+
 
       setStudents(formatted);
     } catch (err) {
@@ -129,8 +156,8 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
         <button
           onClick={() => setActiveFilter("all")}
           className={`px-5 py-2.5 rounded-xl ${activeFilter === "all"
-              ? "bg-green-600 text-black"
-              : "bg-gray-800 text-gray-400"
+            ? "bg-green-600 text-black"
+            : "bg-gray-800 text-gray-400"
             }`}
         >
           All ({students.length})
@@ -139,8 +166,8 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
         <button
           onClick={() => setActiveFilter("eligible")}
           className={`px-5 py-2.5 rounded-xl ${activeFilter === "eligible"
-              ? "bg-green-600 text-black"
-              : "bg-gray-800 text-gray-400"
+            ? "bg-green-600 text-black"
+            : "bg-gray-800 text-gray-400"
             }`}
         >
           Eligible ({students.filter((s) => s.eligible).length})
@@ -149,8 +176,8 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
         <button
           onClick={() => setActiveFilter("ineligible")}
           className={`px-5 py-2.5 rounded-xl ${activeFilter === "ineligible"
-              ? "bg-red-600 text-white"
-              : "bg-gray-800 text-gray-400"
+            ? "bg-red-600 text-white"
+            : "bg-gray-800 text-gray-400"
             }`}
         >
           Ineligible ({students.filter((s) => !s.eligible).length})
@@ -187,8 +214,8 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
                     onClick={() => handleNominate(student)}
                     disabled={!student.eligible || student.nominated}
                     className={`px-4 py-2 rounded-lg ${student.eligible && !student.nominated
-                        ? "bg-purple-600 text-white"
-                        : "bg-gray-700 text-gray-500"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-700 text-gray-500 cursor-not-allowed"
                       }`}
                   >
                     <Award className="w-4 h-4 inline-block mr-1" />
