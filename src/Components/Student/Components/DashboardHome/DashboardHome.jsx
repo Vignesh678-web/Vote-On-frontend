@@ -1,30 +1,95 @@
-import React from "react";
-import { BarChart3, CheckCircle, Users } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { BarChart3, CheckCircle, Users, Loader2 } from "lucide-react";
+import axios from "axios";
 
 export default function DashboardHome() {
-  const stats = [
+  const [stats, setStats] = useState([
     {
       icon: Users,
       title: "Active Elections",
-      value: "3",
-      subtitle: "Ongoing this week",
+      value: "0",
+      subtitle: "Ongoing right now",
       color: "green",
     },
     {
       icon: CheckCircle,
       title: "Candidates",
-      value: "12",
-      subtitle: "Registered so far",
+      value: "0",
+      subtitle: "Approved nominees",
       color: "purple",
     },
     {
       icon: Users,
-      title: "Total Voters",
-      value: "150",
-      subtitle: "Across all classes",
+      title: "Completed",
+      value: "0",
+      subtitle: "Finished elections",
       color: "green",
     },
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${token}` };
+
+      // Fetch ONLY student-relevant elections (Active, Scheduled, Completed)
+      // and approved candidates
+      const [electionsRes, candidatesRes] = await Promise.all([
+        axios.get("http://localhost:5000/api/elections/student/available", { headers }),
+        axios.get("http://localhost:5000/api/candidates/approved", { headers })
+      ]);
+
+      const elections = electionsRes.data.elections || [];
+      const candidates = candidatesRes.data.candidates || [];
+
+      console.log(`[DashboardHome] Loaded ${elections.length} relevant elections and ${candidates.length} candidates`);
+
+      const activeElections = elections.filter(e => e.status === 'Active').length;
+      const completedElections = elections.filter(e => e.status === 'Completed').length;
+
+      setStats([
+        {
+          icon: Users,
+          title: "Active Elections",
+          value: activeElections.toString(),
+          subtitle: "Eligible ongoing polls",
+          color: "green",
+        },
+        {
+          icon: CheckCircle,
+          title: "Approved Candidates",
+          value: candidates.length.toString(),
+          subtitle: "Vetted student nominees",
+          color: "purple",
+        },
+        {
+          icon: Users,
+          title: "Completed Elections",
+          value: completedElections.toString(),
+          subtitle: "Finalized poll results",
+          color: "green",
+        },
+      ]);
+    } catch (err) {
+      console.error("Dashboard stats fetch failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -60,10 +125,10 @@ export default function DashboardHome() {
                   textShadow: "0 0 15px rgba(34, 197, 94, 0.3)",
                 }}
               >
-                Dashboard Overview
+                Student Dashboard
               </h2>
               <p className="text-green-400 font-medium text-sm sm:text-base mt-1">
-                Welcome back! Here's your voting activity summary.
+                Participate in the democratic process of your institution.
               </p>
             </div>
           </div>
@@ -76,19 +141,19 @@ export default function DashboardHome() {
             const isGreen = stat.color === "green";
             const colorClasses = isGreen
               ? {
-                  border: "border-green-500/20",
-                  hoverBorder: "hover:border-green-500/50",
-                  text: "text-green-400",
-                  shadow: "rgba(34, 197, 94, 0.25)",
-                  iconShadow: "rgba(34, 197, 94, 0.5)",
-                }
+                border: "border-green-500/20",
+                hoverBorder: "hover:border-green-500/50",
+                text: "text-green-400",
+                shadow: "rgba(34, 197, 94, 0.25)",
+                iconShadow: "rgba(34, 197, 94, 0.5)",
+              }
               : {
-                  border: "border-purple-500/20",
-                  hoverBorder: "hover:border-purple-500/50",
-                  text: "text-purple-400",
-                  shadow: "rgba(168, 85, 247, 0.25)",
-                  iconShadow: "rgba(168, 85, 247, 0.5)",
-                };
+                border: "border-purple-500/20",
+                hoverBorder: "hover:border-purple-500/50",
+                text: "text-purple-400",
+                shadow: "rgba(168, 85, 247, 0.25)",
+                iconShadow: "rgba(168, 85, 247, 0.5)",
+              };
 
             return (
               <div
@@ -124,3 +189,4 @@ export default function DashboardHome() {
     </div>
   );
 }
+

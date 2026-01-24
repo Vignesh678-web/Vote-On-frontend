@@ -18,7 +18,9 @@ export default function UserLogin() {
     name: '',
     admissionNumber: '',
     email: '',
-    password: ''
+    password: '',
+    className: '',
+    section: ''
   });
 
 

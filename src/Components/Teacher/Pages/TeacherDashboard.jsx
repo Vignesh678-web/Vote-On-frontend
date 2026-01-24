@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Trophy } from "lucide-react";
 
 import Header from "../Components/Header";
 import Sidebar from "../Components/Sidebar";
@@ -7,6 +8,7 @@ import Overview from "../Components/Overview";
 import MyStudent from "../Components/Students";
 import ManageAttendance from "../Components/Attendance";
 import Candidates from "../Components/Candidates";
+import ManageElections from "../Components/ManageElections";
 
 import UploadData from "../Components/Upload";
 import Results from "../Components/Results";
@@ -27,7 +29,7 @@ const TeacherDashboard = ({
 
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
-  
+
   const [dynamicCandidates, setDynamicCandidates] = useState([]);
   const [dynamicClassInfo, setDynamicClassInfo] = useState(classInfo);
   const [dynamicElection, setDynamicElection] = useState(election);
@@ -131,11 +133,34 @@ const TeacherDashboard = ({
     }
   }, [students, dynamicCandidates]);
 
+  // 🔑 NEW: All Elections for Results
+  const [allElections, setAllElections] = useState([]);
+  const [loadingElections, setLoadingElections] = useState(true);
+
+  // Fetch all elections for results
+  useEffect(() => {
+    const fetchAllElections = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/teacher/class-election", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAllElections(res.data.elections || []);
+      } catch (err) {
+        console.error("Failed to fetch all elections:", err);
+      } finally {
+        setLoadingElections(false);
+      }
+    };
+    fetchAllElections();
+  }, []);
+
   const renderContent = () => {
-    if (loadingStudents) {
+    if (loadingStudents || loadingElections) {
       return (
-        <div className="flex items-center justify-center h-full text-green-400">
-          Loading students...
+        <div className="flex flex-col items-center justify-center h-full gap-4 text-green-400">
+          <div className="w-12 h-12 border-4 border-green-500/20 border-t-green-500 rounded-full animate-spin"></div>
+          <p className="font-mono text-sm tracking-widest uppercase">Initializing Dashboard Vault...</p>
         </div>
       );
     }
@@ -167,6 +192,9 @@ const TeacherDashboard = ({
           />
         );
 
+      case "elections":
+        return <ManageElections />;
+
       case "candidate-details":
         return (
           <CandidateDetails
@@ -182,7 +210,46 @@ const TeacherDashboard = ({
         return <UploadData />;
 
       case "results":
-        return <Results election={dynamicElection} candidates={dynamicCandidates} />;
+        if (allElections.length === 0) {
+          return (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-gray-500">
+              <Trophy size={64} className="opacity-10 mb-6" />
+              <h3 className="text-xl font-bold text-white mb-2">No Polls Found</h3>
+              <p>Create and complete an election to see results here.</p>
+            </div>
+          );
+        }
+
+        // Find the most robust version of the selected election from our full list
+        const currentElectionId = dynamicElection?._id || allElections[0]?._id;
+        const currentElection = allElections.find(el => el._id === currentElectionId) || allElections[0];
+
+        return (
+          <div className="space-y-6">
+            <div className="px-8 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <h2 className="text-xl font-black text-white uppercase tracking-tighter">Election Library</h2>
+              <div className="flex items-center gap-3 bg-gray-900 border border-white/10 px-4 py-2 rounded-xl text-gray-400 text-xs">
+                <span>Viewing:</span>
+                <select
+                  className="bg-transparent text-green-400 font-bold outline-none cursor-pointer"
+                  onChange={(e) => {
+                    const sel = allElections.find(el => el._id === e.target.value);
+                    setDynamicElection(sel);
+                  }}
+                  value={currentElection?._id}
+                >
+                  {allElections.map(el => (
+                    <option key={el._id} value={el._id}>{el.title} ({el.status})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <Results
+              election={currentElection}
+              candidates={currentElection.candidates}
+            />
+          </div>
+        );
 
       case "settings":
         return (

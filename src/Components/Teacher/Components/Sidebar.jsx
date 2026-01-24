@@ -27,8 +27,11 @@ const Sidebar = ({
     { id: "overview", label: "Overview", icon: Home, description: "Dashboard overview" },
     { id: "students", label: " Class Students", icon: Users, description: "Manage student data" },
     { id: "attendance", label: "Manage Attendance", icon: Percent, description: "Track attendance" },
-    { id: "candidates", label: "Candidates", icon: Award, description: "Election candidates",
-      badge: safeCandidates.filter(c => c.status === "pending").length },
+    {
+      id: "candidates", label: "Candidates", icon: Award, description: "Election candidates",
+      badge: safeCandidates.filter(c => c.status === "pending").length
+    },
+    { id: "elections", label: "Manage Election", icon: Vote, description: "Create & control elections" },
     { id: "upload", label: "Upload Data", icon: Upload, description: "Import student data" },
     { id: "results", label: "Election Results", icon: Vote, description: "View results" },
     { id: "settings", label: "Settings", icon: Settings, description: "Preferences" },
@@ -59,11 +62,10 @@ const Sidebar = ({
                   setActiveTab(item.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full rounded-xl transition-all duration-300 ${
-                  isActive
+                className={`w-full rounded-xl transition-all duration-300 ${isActive
                     ? "bg-green-500/10 border border-green-500/50"
                     : "border border-transparent hover:border-green-500/30 hover:bg-green-500/5"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-4 px-4 py-4">
                   <div className={isActive ? "text-green-400 scale-110" : "text-gray-400"}>

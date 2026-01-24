@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   Crown,
+  Trophy,
 } from "lucide-react";
 
 import VoteOnLogo from "../../../Admin/Assets/logo.png";
@@ -21,6 +22,7 @@ export default function Layout({ activeSection, setActiveSection, children }) {
     { id: "classvote", label: "Class Vote", icon: <Users size={20} /> },
     { id: "collegevote", label: "College Vote", icon: <Crown size={20} /> },
     { id: "candidates", label: "Candidates", icon: <ClipboardList size={20} /> },
+    { id: "results", label: "Results", icon: <Trophy size={20} /> },
     { id: "profile", label: "Profile", icon: <UserCircle2 size={20} /> },
   ];
 
@@ -57,9 +59,8 @@ export default function Layout({ activeSection, setActiveSection, children }) {
             <img
               src={VoteOnLogo}
               alt="VoteON"
-              className={`mx-auto transition-all duration-300 ${
-                sidebarOpen ? "w-32" : "w-10"
-              }`}
+              className={`mx-auto transition-all duration-300 ${sidebarOpen ? "w-32" : "w-10"
+                }`}
               style={{ filter: "drop-shadow(0 0 15px rgba(0,255,65,0.6))" }}
             />
             {sidebarOpen && (
@@ -77,11 +78,10 @@ export default function Layout({ activeSection, setActiveSection, children }) {
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
-                ${
-                  activeSection === item.id
+                ${activeSection === item.id
                     ? "bg-[#00ff41] text-black"
                     : "text-[#00ff41]/70 hover:bg-[#00ff41]/10 hover:text-[#00ff41]"
-                }`}
+                  }`}
               >
                 {item.icon}
                 {sidebarOpen && <span>{item.label}</span>}
@@ -119,7 +119,16 @@ export default function Layout({ activeSection, setActiveSection, children }) {
               {activeSection}
             </h1>
           </div>
-          <p className="text-gray-400 text-sm">Welcome, Student 👋</p>
+          <p className="text-gray-400 text-sm">
+            Welcome, {(() => {
+              try {
+                const s = JSON.parse(localStorage.getItem("student") || "{}");
+                return s.name || "Student";
+              } catch (e) {
+                return "Student";
+              }
+            })()} 👋
+          </p>
         </header>
 
         {/* Content */}

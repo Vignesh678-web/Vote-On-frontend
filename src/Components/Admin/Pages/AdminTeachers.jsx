@@ -66,13 +66,13 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredTeachers.map((teacher) => (
           <div
-            key={teacher.id}
+            key={teacher._id || teacher.id}
             className="bg-[#111111] border border-[#00ff41]/20 rounded-xl p-4 sm:p-6 transition-all hover:border-[#00ff41]/60 hover:shadow-[0_0_20px_rgba(0,255,65,0.2)]"
           >
             {/* Teacher Header */}
             <div className="flex items-start gap-4 mb-4">
               <img
-                src={teacher.image}
+                src={teacher.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name || 'T')}`}
                 alt={teacher.name}
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-3 border-[#00ff41]"
                 style={{ boxShadow: "0 0 15px rgba(0,255,65,0.4)" }}
@@ -82,10 +82,10 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
                   {teacher.name}
                 </h3>
                 <p className="text-[#00ff41] text-sm font-semibold">
-                  {teacher.subject}
+                  {teacher.subject || "Faculty Member"}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 bg-[#00ff41]/20 text-[#00ff41] text-xs rounded-full border border-[#00ff41]/30">
+                  <span className={`px-2 py-0.5 text-xs rounded-full border ${teacher.status === 'Blocked' ? 'bg-red-500/20 text-red-500 border-red-500/30' : 'bg-[#00ff41]/20 text-[#00ff41] border-[#00ff41]/30'}`}>
                     {teacher.status}
                   </span>
                 </div>
@@ -96,7 +96,7 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <Building size={16} className="text-[#00ff41]/70" />
-                <span>{teacher.department}</span>
+                <span>{teacher.department || "No Department"}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <Mail size={16} className="text-[#00ff41]/70" />
@@ -104,11 +104,11 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <Phone size={16} className="text-[#00ff41]/70" />
-                <span>{teacher.phone}</span>
+                <span>{teacher.phone || "No Contact"}</span>
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <UserCheck size={16} className="text-[#00ff41]/70" />
-                <span>{teacher.experience} experience</span>
+                <span>{teacher.experience || "N/A"} experience</span>
               </div>
             </div>
 

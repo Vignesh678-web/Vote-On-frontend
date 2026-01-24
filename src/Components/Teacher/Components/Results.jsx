@@ -1,274 +1,190 @@
 import React, { useState } from 'react';
-import { Trophy, Award, Users, TrendingUp, Plus } from 'lucide-react';
+import { Trophy, Award, Users, TrendingUp, Plus, Clock, CheckCircle } from 'lucide-react';
 
-const Results = () => {
-  const [results, setResults] = useState([
-    { id: 1, name: 'John Doe', admission: 'ADM2024001', votes: 145, percentage: 35.8, rank: 1 },
-    { id: 2, name: 'Sarah Smith', admission: 'ADM2024002', votes: 128, percentage: 31.6, rank: 2 },
-    { id: 3, name: 'Mike Johnson', admission: 'ADM2024003', votes: 89, percentage: 22.0, rank: 3 },
-    { id: 4, name: 'Emily Davis', admission: 'ADM2024004', votes: 43, percentage: 10.6, rank: 4 },
-  ]);
+const Results = ({ election, candidates }) => {
+  // Use passed candidates or fallback to election.candidates
+  // We need to handle the structure variation between dashboards
+  const rawCandidates = candidates || election?.candidates || [];
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newResult, setNewResult] = useState({
-    name: '',
-    admission: '',
-    votes: ''
+  const processedResults = rawCandidates.map(c => {
+    // Determine votes count looking at different structures
+    const votes = c.votesCount ?? c.votes ?? 0;
+
+    // Normalize student data
+    const studentInfo = c.student || c;
+    const name = studentInfo.name || 'Unknown Candidate';
+    const admission = studentInfo.admissionNumber || studentInfo.admission || 'N/A';
+    const id = studentInfo._id || studentInfo.id;
+
+    return {
+      id,
+      name,
+      admission,
+      votes,
+      percentage: 0, // calculated below
+      rank: 0,
+      isWinner: false
+    };
+  }).sort((a, b) => b.votes - a.votes);
+
+  const totalVotes = processedResults.reduce((sum, r) => sum + r.votes, 0);
+
+  processedResults.forEach((r, index) => {
+    r.rank = index + 1;
+    r.percentage = totalVotes > 0 ? parseFloat((r.votes / totalVotes) * 100).toFixed(1) : 0;
+    // Highlight first place as winner (or use election.winner ID if it exists and matches)
+    r.isWinner = index === 0 && r.votes > 0;
   });
 
-  const totalVotes = results.reduce((sum, r) => sum + r.votes, 0);
+  const results = processedResults;
 
-  const handleAddResult = () => {
-    if (newResult.name && newResult.admission && newResult.votes) {
-      const votes = parseInt(newResult.votes);
-      const newTotal = totalVotes + votes;
-      const percentage = ((votes / newTotal) * 100).toFixed(1);
-      
-      // Recalculate all percentages
-      const updatedResults = results.map(r => ({
-        ...r,
-        percentage: parseFloat(((r.votes / newTotal) * 100).toFixed(1))
-      }));
-
-      const newEntry = {
-        id: Date.now(),
-        name: newResult.name,
-        admission: newResult.admission,
-        votes: votes,
-        percentage: parseFloat(percentage),
-        rank: results.length + 1
-      };
-
-      const allResults = [...updatedResults, newEntry].sort((a, b) => b.votes - a.votes);
-      
-      // Update ranks
-      allResults.forEach((r, index) => {
-        r.rank = index + 1;
-      });
-
-      setResults(allResults);
-      setNewResult({ name: '', admission: '', votes: '' });
-      setShowAddModal(false);
-    }
-  };
-
-
+  if (!election && results.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-gray-500 py-20">
+        <Trophy size={64} className="opacity-10 mb-4" />
+        <p className="text-xl font-medium">No results data available yet.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-black p-6 space-y-6" style={{ background: 'linear-gradient(to bottom, #000000, #0a0f0a)' }}>
+    <div className="p-4 lg:p-8 space-y-8">
       {/* Header */}
-      <div 
-        className="bg-gray-900 rounded-xl shadow-sm p-6 border border-green-500/30"
-        style={{ boxShadow: '0 0 30px rgba(34, 197, 94, 0.15)' }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div 
-              className="p-3 bg-green-500/20 rounded-xl border border-green-500/40"
-              style={{ boxShadow: '0 0 20px rgba(34, 197, 94, 0.4)' }}
-            >
-              <Trophy 
-                className="w-6 h-6 text-green-400" 
-                style={{ filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))' }} 
-              />
+      <div className="bg-gray-900/60 backdrop-blur-md rounded-3xl p-8 border border-green-500/20 shadow-2xl overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-[100px] -z-10"></div>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center border border-green-500/30">
+              <Trophy className="text-yellow-400 w-8 h-8" />
             </div>
             <div>
-              <h3 
-                className="text-2xl font-bold text-white mb-1"
-                style={{ textShadow: '0 0 15px rgba(34, 197, 94, 0.3)' }}
-              >
-                Class Representative Election Results
-              </h3>
-              <p className="text-sm text-green-400 font-semibold">Final voting results and rankings</p>
-            </div>
-          </div>
-          <button 
-            onClick={() => setShowAddModal(true)}
-            className="bg-gradient-to-r from-green-500 to-green-400 hover:from-green-400 hover:to-green-300 text-black px-6 py-3 rounded-xl flex items-center gap-2 transition-all font-bold border border-green-400/50 group"
-            style={{ boxShadow: '0 0 25px rgba(34, 197, 94, 0.5)' }}
-          >
-            <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            Add Result
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div 
-          className="bg-gray-900 border border-green-500/30 rounded-xl p-6"
-          style={{ boxShadow: '0 0 25px rgba(34, 197, 94, 0.1)' }}
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="w-5 h-5 text-green-400" />
-            <span className="text-sm text-gray-400 font-semibold">Total Votes Cast</span>
-          </div>
-          <p className="text-3xl font-bold text-white" style={{ textShadow: '0 0 15px rgba(34, 197, 94, 0.3)' }}>
-            {totalVotes}
-          </p>
-        </div>
-
-        <div 
-          className="bg-gray-900 border border-green-500/30 rounded-xl p-6"
-          style={{ boxShadow: '0 0 25px rgba(34, 197, 94, 0.1)' }}
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <Trophy className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm text-gray-400 font-semibold">Winner</span>
-          </div>
-          <p className="text-2xl font-bold text-white" style={{ textShadow: '0 0 15px rgba(34, 197, 94, 0.3)' }}>
-            {results[0]?.name || 'N/A'}
-          </p>
-        </div>
-
-        <div 
-          className="bg-gray-900 border border-green-500/30 rounded-xl p-6"
-          style={{ boxShadow: '0 0 25px rgba(34, 197, 94, 0.1)' }}
-        >
-          <div className="flex items-center gap-3 mb-2">
-            <TrendingUp className="w-5 h-5 text-green-400" />
-            <span className="text-sm text-gray-400 font-semibold">Candidates</span>
-          </div>
-          <p className="text-3xl font-bold text-white" style={{ textShadow: '0 0 15px rgba(34, 197, 94, 0.3)' }}>
-            {results.length}
-          </p>
-        </div>
-      </div>
-
-      {/* Results List */}
-      <div className="space-y-4">
-        {results.map((result, index) => (
-          <div 
-            key={result.id}
-            className="bg-gray-900 border border-green-500/30 hover:border-green-500/50 rounded-xl p-6 transition-all duration-300"
-            style={{ boxShadow: '0 0 30px rgba(34, 197, 94, 0.1)' }}
-          >
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                {/* Rank Number */}
-                <div 
-                  className="flex-shrink-0 w-12 h-12 rounded-xl bg-green-500/20 border border-green-500/40 flex items-center justify-center"
-                  style={{ boxShadow: '0 0 15px rgba(34, 197, 94, 0.3)' }}
-                >
-                  <span className="text-xl font-bold text-green-400">#{result.rank}</span>
-                </div>
-
-                {/* Candidate Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h4 
-                      className="font-bold text-white text-xl"
-                      style={{ textShadow: '0 0 12px rgba(34, 197, 94, 0.2)' }}
-                    >
-                      {result.name}
-                    </h4>
-                  </div>
-                  <p className="text-sm text-gray-400 font-semibold mb-3">{result.admission}</p>
-                  
-                  {/* Vote Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400 font-semibold">{result.votes} votes</span>
-                      <span className="text-green-400 font-bold">{result.percentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden border border-green-500/30">
-                      <div 
-                        className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-500 rounded-full"
-                        style={{ 
-                          width: `${result.percentage}%`,
-                          boxShadow: '0 0 15px rgba(34, 197, 94, 0.5)'
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vote Count Display */}
-              <div 
-                className="flex-shrink-0 bg-green-500/10 border border-green-500/40 rounded-xl px-6 py-4 text-center"
-                style={{ boxShadow: '0 0 20px rgba(34, 197, 94, 0.2)' }}
-              >
-                <p className="text-3xl font-bold text-green-400" style={{ textShadow: '0 0 15px rgba(34, 197, 94, 0.4)' }}>
-                  {result.votes}
-                </p>
-                <p className="text-xs text-gray-400 font-semibold mt-1">VOTES</p>
+              <h2 className="text-3xl font-black text-white tracking-tight uppercase">
+                {election?.title || 'ELECTION RESULTS'}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${election?.status === 'Completed' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'}`}>
+                  {election?.status || 'LIVE'}
+                </span>
+                <p className="text-gray-500 text-sm font-medium">| {election?.position || 'Academic Poll'}</p>
               </div>
             </div>
           </div>
-        ))}
+
+          <div className="flex bg-black/40 px-6 py-3 rounded-2xl border border-white/5 divide-x divide-white/10 shadow-inner">
+            <div className="pr-6 text-center">
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Participation</p>
+              <p className="text-xl font-bold text-white leading-none">{totalVotes}</p>
+            </div>
+            <div className="pl-6 text-center font-mono">
+              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 font-sans">Status</p>
+              <p className={`text-sm font-bold uppercase ${election?.status === 'Completed' ? 'text-purple-400' : 'text-green-400'}`}>
+                {election?.status === 'Completed' ? 'Final' : 'Ongoing'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Add Result Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div 
-            className="bg-gray-900 border border-green-500/40 rounded-2xl p-8 max-w-md w-full"
-            style={{ boxShadow: '0 0 50px rgba(34, 197, 94, 0.3)' }}
-          >
-            <h3 
-              className="text-2xl font-bold text-white mb-6"
-              style={{ textShadow: '0 0 15px rgba(34, 197, 94, 0.3)' }}
-            >
-              Add Election Result
+      {/* Grid for Winner and Detail List */}
+      <div className="grid lg:grid-cols-12 gap-8">
+
+        {/* Left Column: Top Stats & Summary */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className={`p-8 rounded-3xl border-2 transition-all duration-500 ${results[0]?.isWinner ? 'bg-gradient-to-br from-yellow-500/10 to-transparent border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.1)]' : 'bg-gray-900 border-gray-800'}`}>
+            <div className="flex justify-between items-start mb-6">
+              <Award className={`${results[0]?.isWinner ? 'text-yellow-400' : 'text-gray-600'}`} size={40} />
+              {results.length > 0 && results[0].votes > 0 && (
+                <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-[10px] font-black tracking-widest animate-bounce">LEADING</span>
+              )}
+            </div>
+            <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em] mb-2">Projected Winner</p>
+            <h3 className="text-3xl font-black text-white tracking-tighter mb-4">
+              {results.length > 0 && results[0].votes > 0 ? results[0].name : "Decision Pending"}
             </h3>
-            
+            {results.length > 0 && results[0].votes > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-end gap-2">
+                  <span className="text-5xl font-black text-white leading-none">{results[0].percentage}%</span>
+                  <span className="text-yellow-500 font-bold mb-1">of total votes</span>
+                </div>
+                <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                  <div className="h-full bg-yellow-500 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.4)]" style={{ width: `${results[0].percentage}%` }}></div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-gray-900/40 border border-white/5 rounded-3xl p-6">
+            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Users size={12} /> Voter Statistics
+            </h4>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-400 mb-2">Candidate Name</label>
-                <input 
-                  type="text"
-                  value={newResult.name}
-                  onChange={(e) => setNewResult({...newResult, name: e.target.value})}
-                  className="w-full bg-gray-800 border border-green-500/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500/60 transition-all"
-                  style={{ boxShadow: '0 0 15px rgba(34, 197, 94, 0.1)' }}
-                  placeholder="Enter candidate name"
-                />
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm font-medium">Valid Votes</span>
+                <span className="text-white font-bold">{totalVotes}</span>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-400 mb-2">Admission Number</label>
-                <input 
-                  type="text"
-                  value={newResult.admission}
-                  onChange={(e) => setNewResult({...newResult, admission: e.target.value})}
-                  className="w-full bg-gray-800 border border-green-500/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500/60 transition-all"
-                  style={{ boxShadow: '0 0 15px rgba(34, 197, 94, 0.1)' }}
-                  placeholder="Enter admission number"
-                />
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400 text-sm font-medium">Candidates</span>
+                <span className="text-white font-bold">{results.length}</span>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-400 mb-2">Total Votes</label>
-                <input 
-                  type="number"
-                  value={newResult.votes}
-                  onChange={(e) => setNewResult({...newResult, votes: e.target.value})}
-                  className="w-full bg-gray-800 border border-green-500/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500/60 transition-all"
-                  style={{ boxShadow: '0 0 15px rgba(34, 197, 94, 0.1)' }}
-                  placeholder="Enter vote count"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 px-6 py-3 rounded-xl font-bold border border-gray-600/50 transition-all"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleAddResult}
-                className="flex-1 bg-gradient-to-r from-green-500 to-green-400 hover:from-green-400 hover:to-green-300 text-black px-6 py-3 rounded-xl font-bold border border-green-400/50 transition-all"
-                style={{ boxShadow: '0 0 25px rgba(34, 197, 94, 0.5)' }}
-              >
-                Add Result
-              </button>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Right Column: Detailed Breakdown */}
+        <div className="lg:col-span-8">
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest pl-2 mb-4">Cumulative Performance</h4>
+
+            {results.map((result, index) => (
+              <div
+                key={result.id}
+                className={`group relative bg-gray-900 border transition-all duration-300 rounded-2xl p-5 flex items-center gap-6 ${result.isWinner ? 'border-yellow-500/30 bg-yellow-500/[0.02]' : 'border-white/5 hover:border-green-500/30'
+                  }`}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shrink-0 transition-transform group-hover:scale-110 ${result.isWinner ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' :
+                    index === 1 ? 'bg-gray-200 text-black' :
+                      'bg-gray-800 text-gray-400'
+                  }`}>
+                  {result.rank}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h5 className="text-white font-bold tracking-tight text-lg mb-0.5 flex items-center gap-2">
+                        {result.name}
+                        {result.isWinner && <Trophy size={16} className="text-yellow-500" />}
+                      </h5>
+                      <p className="text-gray-500 text-xs font-mono font-bold tracking-tighter uppercase">{result.admission}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-white font-black text-xl leading-none block">{result.votes}</span>
+                      <span className="text-gray-500 text-[9px] font-black uppercase">VOTES</span>
+                    </div>
+                  </div>
+
+                  {/* Tiny Progress Bar */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-1.5 bg-black/60 rounded-full overflow-hidden border border-white/5">
+                      <div
+                        className={`h-full transition-all duration-700 rounded-full ${result.isWinner ? 'bg-yellow-500' :
+                            index === 1 ? 'bg-gray-400' : 'bg-green-500'
+                          }`}
+                        style={{ width: `${result.percentage}%` }}
+                      ></div>
+                    </div>
+                    <span className={`text-[10px] font-black w-8 text-right underline underline-offset-2 ${result.isWinner ? 'text-yellow-500' : 'text-gray-400'}`}>
+                      {result.percentage}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };

@@ -15,12 +15,17 @@ export default function StudentDashboard() {
     switch (activeSection) {
       case "dashboard":
         return <DashboardHome />;
-        case "classvote":
-        return <Votingpage />;
+      case "classvote":
+        return <Elections initialType="class" />;
+      case "collegevote":
+        return <Elections initialType="college" />;
       case "elections":
         return <Elections />;
       case "candidates":
         return <Candidates />;
+
+      case "results":
+        return <Elections initialTab="completed" />;
 
       case "profile":
         return <Profile />;
