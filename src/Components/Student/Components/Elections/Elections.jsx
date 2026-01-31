@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarDays, PlayCircle, CheckCircle, Clock, AlertCircle, Loader2, Users, Crown, Trophy } from "lucide-react";
-import { getStudentElections, getAllElections } from "../../../../services/electionApi";
+
+import { getStudentElections, getAllElections } from "../../../../services/electionApi"; 
 
 export default function Elections({ initialType = null, initialTab = "ongoing" }) {
   const navigate = useNavigate();
@@ -186,7 +187,7 @@ export default function Elections({ initialType = null, initialTab = "ongoing" }
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="flex items-center gap-6">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-[#00ff41]/20 to-transparent rounded-2xl flex items-center justify-center border border-[#00ff41]/30 shadow-[0_0_30px_rgba(0,255,65,0.1)]">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-linear-to-br from-[#00ff41]/20 to-transparent rounded-2xl flex items-center justify-center border border-[#00ff41]/30 shadow-[0_0_30px_rgba(0,255,65,0.1)]">
                 {initialType === 'college' ? <Crown className="text-[#00ff41] w-8 h-8 sm:w-10 sm:h-10" /> : <Users className="text-[#00ff41] w-8 h-8 sm:w-10 sm:h-10" />}
               </div>
               <div>

@@ -44,7 +44,7 @@ export const HeroSection = ({ ballotBoxImage }) => {
             <div className="pt-4">
               <button
                 onClick={() => navigate('/UserLogin')}
-                className="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-bold text-xl px-14 py-5 rounded-full transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-green-400/50 border-2 border-green-400 hover:border-green-500"
+                className="bg-linear-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-black font-bold text-xl px-14 py-5 rounded-full transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-green-400/50 border-2 border-green-400 hover:border-green-500"
               >
                 Get Started
               </button>
@@ -60,7 +60,7 @@ export const HeroSection = ({ ballotBoxImage }) => {
       </div>
 
       {/* Bottom Fade Overlay */}
-      <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-black to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-36 bg-linear-to-t from-black to-transparent"></div>
     </section>
   );
 };

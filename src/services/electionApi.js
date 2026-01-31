@@ -270,6 +270,45 @@ export const getApprovedCandidates = async () => {
   }
 };
 
+// Get college-level candidates (admin) — returns students with isCollegeCandidate === true
+export const getCollegeCandidates = async (includeUnapproved = false) => {
+  try {
+    const params = new URLSearchParams();
+    if (includeUnapproved) params.append('includeUnapproved', 'true');
+
+    const response = await fetch(`${API_BASE_URL}/admin/candidates/college${params.toString() ? `?${params.toString()}` : ''}`, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch college candidates');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('getCollegeCandidates error:', error);
+    throw error;
+  }
+};
+
+// convenience: trigger promotion endpoint
+export const promoteClassWinners = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/candidates/promote-class-winners`, {
+      method: 'POST',
+      headers: getHeaders()
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to promote class winners');
+    return data;
+  } catch (err) {
+    console.error('promoteClassWinners error:', err);
+    throw err;
+  }
+};
+
 export default {
   getAllElections,
   getStudentElections,
@@ -282,5 +321,7 @@ export default {
   endElection,
   cancelElection,
   getAllCandidates,
-  getApprovedCandidates
+  getApprovedCandidates,
+  getCollegeCandidates,
+  promoteClassWinners
 };

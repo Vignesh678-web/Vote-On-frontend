@@ -25,7 +25,7 @@ export const FeaturesSection = () => {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-black to-gray-900 py-20 px-6 md:px-12 lg:px-20 text-center mb-20">
+    <section className="bg-linear-to-b from-black to-gray-900 py-20 px-6 md:px-12 lg:px-20 text-center mb-20">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-20">

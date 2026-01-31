@@ -85,7 +85,7 @@ export const ComprehensiveFeaturesSection = () => {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-black to-gray-900 py-32 px-6 sm:px-10 md:px-16 lg:px-24 text-center mb-24">
+    <section className="bg-linear-to-b from-black to-gray-900 py-32 px-6 sm:px-10 md:px-16 lg:px-24 text-center mb-24">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}

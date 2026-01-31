@@ -90,7 +90,7 @@ const Results = ({ election, candidates }) => {
 
         {/* Left Column: Top Stats & Summary */}
         <div className="lg:col-span-4 space-y-6">
-          <div className={`p-8 rounded-3xl border-2 transition-all duration-500 ${results[0]?.isWinner ? 'bg-gradient-to-br from-yellow-500/10 to-transparent border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.1)]' : 'bg-gray-900 border-gray-800'}`}>
+          <div className={`p-8 rounded-3xl border-2 transition-all duration-500 ${results[0]?.isWinner ? 'bg-linear-to-br from-yellow-500/10 to-transparent border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.1)]' : 'bg-gray-900 border-gray-800'}`}>
             <div className="flex justify-between items-start mb-6">
               <Award className={`${results[0]?.isWinner ? 'text-yellow-400' : 'text-gray-600'}`} size={40} />
               {results.length > 0 && results[0].votes > 0 && (

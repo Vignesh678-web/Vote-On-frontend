@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle, Vote, Loader2, AlertCircle, Trophy, User } from "lucide-react";
-import { getElectionById, castVote, getElectionResults } from "../../../services/electionApi";
+
+import { getElectionById, castVote, getElectionResults } from "../../../services/electionApi"; 
 
 export default function VotePage() {
   const location = useLocation();
@@ -141,7 +142,7 @@ export default function VotePage() {
 
           {/* Winner banner */}
           {results.election?.winner && (
-            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 rounded-xl p-6 mb-8 text-center">
+            <div className="bg-linear-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 rounded-xl p-6 mb-8 text-center">
               <Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
               <p className="text-gray-400 text-sm">Winner</p>
               <h2 className="text-2xl font-bold text-white">

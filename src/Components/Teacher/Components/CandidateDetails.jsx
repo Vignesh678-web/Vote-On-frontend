@@ -216,7 +216,7 @@ const CandidateDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center">
         <div className="w-16 h-16 border-4 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
       </div>
     );
@@ -224,7 +224,7 @@ const CandidateDetails = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-linear-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center p-6">
         <div className="bg-red-950/20 border border-red-500/30 rounded-2xl p-8 max-w-md text-center">
           <p className="text-red-400 font-semibold">{error}</p>
         </div>
@@ -243,7 +243,7 @@ const CandidateDetails = () => {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-950 via-black to-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="relative max-w-5xl mx-auto">
         {/* BACK BUTTON */}
         <button
@@ -337,7 +337,7 @@ const CandidateDetails = () => {
             <div className="pt-6 border-t border-emerald-500/20">
               <button
                 onClick={openModalForEdit}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-emerald-500/50 hover:shadow-2xl transform hover:scale-105"
+                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-emerald-500/50 hover:shadow-2xl transform hover:scale-105"
               >
                 <Edit size={20} />
                 <span>Edit Details</span>
@@ -352,7 +352,7 @@ const CandidateDetails = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-gray-900/95 border border-emerald-500/30 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* MODAL HEADER */}
-            <div className="sticky top-0 bg-gradient-to-r from-gray-900 to-gray-800 border-b border-emerald-500/20 p-6 flex items-center justify-between">
+            <div className="sticky top-0 bg-linear-to-r from-gray-900 to-gray-800 border-b border-emerald-500/20 p-6 flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-white">
                   {modalMode === "add" ? "Add Candidate Details" : "Edit Candidate Details"}
@@ -473,7 +473,7 @@ const CandidateDetails = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>

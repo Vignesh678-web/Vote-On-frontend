@@ -10,7 +10,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen p-6 sm:p-10 bg-gradient-to-b from-black to-[#0a0f0a] text-white">
+    <div className="min-h-screen p-6 sm:p-10 bg-linear-to-b from-black to-[#0a0f0a] text-white">
       {/* Header */}
       <header className="mb-10">
         <h1

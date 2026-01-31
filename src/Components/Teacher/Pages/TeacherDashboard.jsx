@@ -137,6 +137,36 @@ const TeacherDashboard = ({
   const [allElections, setAllElections] = useState([]);
   const [loadingElections, setLoadingElections] = useState(true);
 
+  // Helper: robust winner-name resolver (handles id, populated object, or derive from candidates)
+  const getWinnerName = (el) => {
+    if (!el) return '—';
+
+    // 1) Already populated object
+    if (el.winner && typeof el.winner === 'object' && el.winner.name) return el.winner.name;
+
+    // 2) winner stored as an id (string or ObjectId-like) — try to match against candidates
+    if (el.winner && (typeof el.winner === 'string' || typeof el.winner === 'number')) {
+      const match = (el.candidates || []).find(c => {
+        const sid = c.student?._id || c.student;
+        return sid && String(sid) === String(el.winner);
+      });
+      if (match) return match.student?.name || match.name || String(el.winner);
+      return String(el.winner).slice(0, 8); // show short id as fallback
+    }
+
+    // 3) Derive from candidates by highest votes (votesCount or votes)
+    if (Array.isArray(el.candidates) && el.candidates.length > 0) {
+      const winnerFromCandidates = el.candidates.reduce((best, cur) => {
+        const bestVotes = best?.votesCount ?? best?.votes ?? -1;
+        const curVotes = cur?.votesCount ?? cur?.votes ?? 0;
+        return curVotes > bestVotes ? cur : best;
+      }, null);
+      if (winnerFromCandidates) return winnerFromCandidates.student?.name || winnerFromCandidates.name || '—';
+    }
+
+    return '—';
+  };
+
   // Fetch all elections for results
   useEffect(() => {
     const fetchAllElections = async () => {
@@ -224,8 +254,11 @@ const TeacherDashboard = ({
         const currentElectionId = dynamicElection?._id || allElections[0]?._id;
         const currentElection = allElections.find(el => el._id === currentElectionId) || allElections[0];
 
+        // Show the selected election in detail and also render a scrollable list of all declared results
+        const completedElections = allElections.filter(e => e.status === 'Completed');
+
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="px-8 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4">
               <h2 className="text-xl font-black text-white uppercase tracking-tighter">Election Library</h2>
               <div className="flex items-center gap-3 bg-gray-900 border border-white/10 px-4 py-2 rounded-xl text-gray-400 text-xs">
@@ -244,10 +277,62 @@ const TeacherDashboard = ({
                 </select>
               </div>
             </div>
+
+            {/* Detailed view for the currently selected election */}
             <Results
               election={currentElection}
               candidates={currentElection.candidates}
             />
+
+            {/* All Declared Results (teacher wants to see every election result at once) */}
+            <div className="px-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">All Declared Results</h3>
+                <p className="text-sm text-gray-400">Showing {completedElections.length} completed poll{completedElections.length !== 1 ? 's' : ''}</p>
+              </div>
+
+              {completedElections.length === 0 ? (
+                <div className="rounded-xl border border-white/5 bg-gray-900 p-8 text-center text-gray-400">
+                  No declared results yet. Completed elections will appear here.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {completedElections.map((el) => (
+                    <button
+                      key={el._id}
+                      className="text-left group bg-gray-900 border border-white/5 rounded-2xl p-4 hover:scale-[1.01] transition-shadow duration-200"
+                      onClick={() => {
+                        setDynamicElection(el);
+                        // bring the detailed view into focus (accessibility + UX)
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      aria-label={`View results for ${el.title}`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-3.5 h-12 rounded-md bg-linear-to-b from-green-400/30 to-transparent" />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <div className="text-sm text-gray-400 uppercase tracking-wide text-xs">{el.position} • {el.className}-{el.section}</div>
+                              <div className="text-white font-bold mt-1">{el.title}</div>
+                              <div className="text-[11px] text-gray-500 mt-1">Declared: {el.endDate ? new Date(el.endDate).toLocaleDateString() : '—'}</div>
+                            </div>
+
+                            <div className="text-right">
+                              <div className="text-[12px] text-gray-400">Winner</div>
+                              <div className="text-sm font-black text-yellow-400 mt-1">{getWinnerName(el)}</div>
+                              <div className="text-xs text-gray-500 mt-1">{el.totalVotes || 0} votes</div>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 text-xs text-gray-400">Click to open detailed result view</div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         );
 
