@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Home, Users, BarChart3, FileText, Settings, X, Menu, Award, Badge } from "lucide-react";
+import { Home, Users, BarChart3, FileText, Settings as SettingsIcon, X, Menu, Award, Badge, Trophy, History as HistoryIcon } from "lucide-react";
 import Logo from "./Logo";
 
 export const AdminLayout = ({ activeSection, setActiveSection, children }) => {
@@ -7,13 +7,14 @@ export const AdminLayout = ({ activeSection, setActiveSection, children }) => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'faculty', label: 'Faculty Management', icon: Users },
+    { id: 'faculty', label: 'Officer Management', icon: Users },
     { id: 'elections', label: 'Monitor Elections', icon: BarChart3 },
     { id: 'results', label: 'Results', icon: FileText },
+    { id: 'collegeVoting', label: 'College Election', icon: Trophy },
     // 🔹 NEW SECTION
     { id: 'candidateApproval', label: 'Candidate Approval', icon: Award },
-    { id: 'candidateParticipationTracker', label: 'Candidate Tracker', icon: Badge },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'auditLogs', label: 'Audit Logs', icon: HistoryIcon },
+    { id: 'settings', label: 'Profile & Settings', icon: SettingsIcon },
   ];
 
   return (

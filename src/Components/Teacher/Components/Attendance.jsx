@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { CheckCircle, XCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const Attendance = () => {
+  const location = useLocation(); // Used to detect navigation
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,9 +17,11 @@ const [saving, setSaving] = useState(false);
 
 
 
+  // Refetch whenever location changes (user navigates to this page)
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -48,7 +52,7 @@ const [saving, setSaving] = useState(false);
     };
 
     fetchStudents();
-  }, []);
+  }, [location.key]);
 
   if (loading) {
     return (

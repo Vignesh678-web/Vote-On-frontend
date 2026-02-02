@@ -1,16 +1,30 @@
-import { useState, useEffect } from "react";
-import { Trash2, Users, Trophy, Vote, Plus, Play, Edit3, CheckCircle2, Award } from "lucide-react";
+import { Trash2, Users, Trophy, Vote, Plus, Play, Edit3, CheckCircle2, Award, Loader2 } from "lucide-react";
+import { 
+  getCollegeCandidates, 
+  promoteClassWinners, 
+  createElection as apiCreateElection,
+  addCandidateToElection as apiAddCandidate,
+  startElection as apiStartElection,
+  endElection as apiEndElection
+} from "../../../services/electionApi";
+import { useState } from "react";
+import { useEffect } from "react";
 
-const CollegeVoting = () => {
+const CollegeVoting = ({ refreshData }) => {
   const [electionName, setElectionName] = useState("");
   const [selectedPositions, setSelectedPositions] = useState([]);
   const [electionCreated, setElectionCreated] = useState(false);
   const [electionStarted, setElectionStarted] = useState(false);
+  const [backendElectionId, setBackendElectionId] = useState(null);
 
   // Candidates organized by position: { positionName: [{ name, votes }] }
   const [positionCandidates, setPositionCandidates] = useState({});
   const [candidateName, setCandidateName] = useState("");
   const [currentPosition, setCurrentPosition] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [positionElectionIds, setPositionElectionIds] = useState({});
+  const [isCreating, setIsCreating] = useState(false);
 
   // --- College-level candidates (promoted after class wins) ---
   const [collegeCandidates, setCollegeCandidates] = useState([]);
@@ -32,15 +46,6 @@ const CollegeVoting = () => {
     }
   };
 
-  const promoteClassWinnersHandler = async () => {
-    setCollegeLoading(true);
-    try {
-      const res = await promoteClassWinners();
-      return res;
-    } finally {
-      setCollegeLoading(false);
-    }
-  };
   const handlePromoteWinners = async () => {
     try {
       setCollegeLoading(true);
@@ -48,7 +53,7 @@ const CollegeVoting = () => {
       alert(res.message);
       fetchCollegeCandidates();
     } catch (err) {
-      alert(err.message);
+      alert(err.message || "Failed to promote winners");
     } finally {
       setCollegeLoading(false);
     }
@@ -82,7 +87,7 @@ const CollegeVoting = () => {
     }
   };
 
-  const createElection = () => {
+  const createElection = async () => {
     if (!electionName.trim()) {
       alert("Please enter an election name!");
       return;
@@ -91,32 +96,76 @@ const CollegeVoting = () => {
       alert("Please select at least one position!");
       return;
     }
-
-    // Initialize candidates object for selected positions
-    const initialCandidates = {};
-    selectedPositions.forEach(posId => {
-      initialCandidates[posId] = [];
-    });
-    setPositionCandidates(initialCandidates);
-    setCurrentPosition(selectedPositions[0]);
-    setElectionCreated(true);
-  };
-
-  const addCandidate = () => {
-    if (!candidateName.trim() || !currentPosition || electionStarted) return;
-
-    const currentCandidates = positionCandidates[currentPosition] || [];
-
-    if (currentCandidates.some(c => c.name.toLowerCase() === candidateName.trim().toLowerCase())) {
-      alert("This candidate already exists for this position!");
+    if (!startDate || !endDate) {
+      alert("Please set start and end dates!");
       return;
     }
 
-    setPositionCandidates({
-      ...positionCandidates,
-      [currentPosition]: [...currentCandidates, { name: candidateName.trim(), votes: 0 }]
-    });
-    setCandidateName("");
+    try {
+      setIsCreating(true);
+      const newPositionIds = {};
+      const initialCandidates = {};
+
+      for (const posId of selectedPositions) {
+        const posName = getPositionName(posId);
+        const res = await apiCreateElection({
+          title: `${electionName} - ${posName}`,
+          type: 'college',
+          position: posName,
+          startDate,
+          endDate,
+          minAttendanceRequired: 0 // Usually flexible for college candidates
+        });
+        
+        if (res.election && res.election._id) {
+          newPositionIds[posId] = res.election._id;
+          initialCandidates[posId] = [];
+        }
+      }
+
+      setPositionElectionIds(newPositionIds);
+      setPositionCandidates(initialCandidates);
+      setCurrentPosition(selectedPositions[0]);
+      setElectionCreated(true);
+      alert("College elections created successfully in backend!");
+      if (refreshData) refreshData();
+    } catch (err) {
+      alert(err.message || "Failed to create elections");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const addCandidate = async (studentId) => {
+    if (!studentId || !currentPosition || electionStarted) return;
+
+    const electionId = positionElectionIds[currentPosition];
+    if (!electionId) {
+      alert("No backend election found for this position");
+      return;
+    }
+
+    try {
+      setCollegeLoading(true);
+      const res = await apiAddCandidate(electionId, studentId);
+      
+      const student = collegeCandidates.find(c => c._id === studentId);
+      
+      setPositionCandidates({
+        ...positionCandidates,
+        [currentPosition]: [...(positionCandidates[currentPosition] || []), { 
+          _id: studentId,
+          name: student.name, 
+          votes: 0,
+          photoUrl: student.photoUrl
+        }]
+      });
+      alert(`Added ${student.name} to ${getPositionName(currentPosition)} election`);
+    } catch (err) {
+      alert(err.message || "Failed to add candidate");
+    } finally {
+      setCollegeLoading(false);
+    }
   };
 
   const removeCandidate = (positionId, candidateIndex) => {
@@ -134,24 +183,26 @@ const CollegeVoting = () => {
     );
   };
 
-  const startElection = () => {
+  const startElection = async () => {
     if (!canStartElection()) {
       alert("Each position must have at least 2 candidates to start the election!");
       return;
     }
-    setElectionStarted(true);
-  };
-
-  const castVote = (positionId, candidateIndex) => {
-    if (!electionStarted) return;
-
-    const updatedCandidates = [...positionCandidates[positionId]];
-    updatedCandidates[candidateIndex].votes += 1;
-
-    setPositionCandidates({
-      ...positionCandidates,
-      [positionId]: updatedCandidates
-    });
+    
+    try {
+      setIsCreating(true);
+      for (const posId of selectedPositions) {
+        const eid = positionElectionIds[posId];
+        await apiStartElection(eid);
+      }
+      setElectionStarted(true);
+      alert("All college elections are now LIVE and visible to students!");
+      if (refreshData) refreshData();
+    } catch (err) {
+      alert(err.message || "Failed to start elections");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const resetElection = () => {
@@ -212,6 +263,28 @@ const CollegeVoting = () => {
                 />
               </div>
 
+              {/* Dates */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-300">Start Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full rounded-lg border border-emerald-500/30 bg-slate-900/50 px-4 py-3 text-white outline-none transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-300">End Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full rounded-lg border border-emerald-500/30 bg-slate-900/50 px-4 py-3 text-white outline-none transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                  />
+                </div>
+              </div>
+
               {/* Core Positions */}
               <div>
                 <label className="mb-3 block text-sm font-medium text-slate-300">
@@ -270,11 +343,20 @@ const CollegeVoting = () => {
 
               <button
                 onClick={createElection}
-                disabled={!electionName.trim() || selectedPositions.length === 0}
+                disabled={!electionName.trim() || selectedPositions.length === 0 || isCreating}
                 className="w-full rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 px-6 py-4 text-lg font-semibold text-white transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
               >
-                <Plus className="mr-2 inline-block h-5 w-5" />
-                Create Election
+                {isCreating ? (
+                  <>
+                    <Loader2 className="mr-2 inline-block h-5 w-5 animate-spin" />
+                    Creating Elections...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 inline-block h-5 w-5" />
+                    Create {selectedPositions.length} Position Elections
+                  </>
+                )}
               </button>
             </div>
 
@@ -340,24 +422,35 @@ const CollegeVoting = () => {
                     </select>
                   </div>
 
-                  {/* Candidate Input */}
-                  <input
-                    type="text"
-                    placeholder="Enter candidate name..."
-                    value={candidateName}
-                    onChange={(e) => setCandidateName(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && addCandidate()}
-                    className="w-full rounded-lg border border-emerald-500/30 bg-slate-900/50 px-4 py-3 text-white outline-none transition-all placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
-                  />
+                  {/* Candidate Selection from Promoted Winners */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Select Nominee (Promoted Winners)
+                    </label>
+                    <select
+                      className="w-full rounded-lg border border-emerald-500/30 bg-slate-900/50 px-4 py-3 text-white outline-none transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          addCandidate(e.target.value);
+                          e.target.value = ""; // reset
+                        }
+                      }}
+                    >
+                      <option value="">-- Choose a winner to add --</option>
+                      {collegeCandidates
+                        .filter(c => !positionCandidates[currentPosition]?.some(pc => pc._id === c._id))
+                        .map(c => (
+                          <option key={c._id} value={c._id}>
+                            {c.name} ({c.className} {c.section}) - {c.position || 'Class Rep'}
+                          </option>
+                        ))
+                      }
+                    </select>
+                  </div>
 
-                  <button
-                    onClick={addCandidate}
-                    disabled={!candidateName.trim()}
-                    className="w-full rounded-lg bg-linear-to-r from-emerald-500 to-teal-500 px-4 py-3 font-semibold text-white transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-none"
-                  >
-                    <Plus className="mr-2 inline-block h-4 w-4" />
-                    Add Candidate
-                  </button>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Only students promoted to "College Candidate" status appear here.
+                  </p>
                 </div>
               )}
 
@@ -585,13 +678,12 @@ const CollegeVoting = () => {
 
                                 <div className="flex items-center gap-2">
                                   {electionStarted ? (
-                                    <button
-                                      onClick={() => castVote(posId, originalIndex)}
-                                      className="rounded-lg bg-emerald-500 px-6 py-2 font-semibold text-white transition-all hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/20"
-                                    >
-                                      <Vote className="mr-2 inline-block h-4 w-4" />
-                                      Vote
-                                    </button>
+                                    <div className="flex flex-col items-end">
+                                      <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-1">Live Results</span>
+                                      <div className="bg-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-lg font-mono text-sm border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                        {candidate.votes} Votes
+                                      </div>
+                                    </div>
                                   ) : (
                                     <button
                                       onClick={() => removeCandidate(posId, originalIndex)}
@@ -605,6 +697,31 @@ const CollegeVoting = () => {
                             </div>
                           );
                         })}
+                      </div>
+                    )}
+                    
+                    {electionStarted && (
+                      <div className="mt-6 flex justify-end">
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(`End election for ${getPositionName(posId)} and declare results?`)) return;
+                            try {
+                              setCollegeLoading(true);
+                              await apiEndElection(positionElectionIds[posId]);
+                              alert(`Election for ${getPositionName(posId)} ended successfully!`);
+                              if (refreshData) refreshData();
+                              // You could refresh state here
+                            } catch (err) {
+                              alert(err.message);
+                            } finally {
+                              setCollegeLoading(false);
+                            }
+                          }}
+                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20"
+                        >
+                          <Award className="w-4 h-4" />
+                          End Election & Declare Winner
+                        </button>
                       </div>
                     )}
                   </div>

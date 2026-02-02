@@ -67,7 +67,7 @@ const Header = ({
                 VoteOn
               </h1>
               <p className="text-green-400 text-xs font-semibold hidden sm:block">
-                Teacher Dashboard
+                Officer Panel
               </p>
             </div>
           </div>
@@ -118,10 +118,10 @@ const Header = ({
               className="text-white font-bold text-sm"
               style={{ textShadow: "0 0 10px rgba(34,197,94,0.2)" }}
             >
-              {teacherName || "Teacher"}
+              {teacherName || "Faculty Officer"}
             </p>
             <p className="text-green-400 text-xs font-semibold">
-              {teacherRole || "Faculty"}
+              {teacherRole || "Officer"}
             </p>
           </div>
         </div>

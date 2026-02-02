@@ -20,9 +20,23 @@ export default function Elections({ initialType = null, initialTab = "ongoing" }
         setLoading(true);
         setError(null);
 
+        // Verify token exists
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Authentication required. Please log in again.');
+          console.error('[Elections] No auth token found');
+          setLoading(false);
+          return;
+        }
+
+        console.log('[Elections] Fetching student elections with type filter:', initialType);
+
         // Fetch student-specific elections (Active, Scheduled, and Completed)
         const response = await getStudentElections();
+        console.log('[Elections] API Response:', response);
+        
         let allRelevantElections = response.elections || [];
+        console.log('[Elections] Total elections received:', allRelevantElections.length);
 
         // Split into ongoing and completed
         let ongoing = allRelevantElections.filter(e => e.status === 'Active' || e.status === 'Scheduled');
@@ -32,13 +46,26 @@ export default function Elections({ initialType = null, initialTab = "ongoing" }
         if (initialType) {
           ongoing = ongoing.filter(e => e.type === initialType);
           completed = completed.filter(e => e.type === initialType);
+          console.log(`[Elections] Filtered for type "${initialType}": ${ongoing.length} ongoing, ${completed.length} completed`);
         }
 
         setOngoingElections(ongoing);
         setCompletedElections(completed);
       } catch (err) {
-        console.error('Error fetching elections:', err);
-        setError('Failed to load elections. Please try again.');
+        console.error('[Elections] Error fetching elections:', err);
+        console.error('[Elections] Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        
+        if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+          setError('Session expired. Please log in again.');
+        } else if (err.message?.includes('403') || err.message?.includes('Forbidden')) {
+          setError('Access denied. You do not have permission to view elections.');
+        } else {
+          setError('Failed to load elections. Please try again.');
+        }
       } finally {
         setLoading(false);
       }

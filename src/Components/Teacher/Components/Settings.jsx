@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 
 const SettingsComponent = ({
-  teacherName = "Teacher",
+  teacherName = "Faculty Officer",
   setTeacherName,
-  teacherRole = "Class Teacher",
+  teacherRole = "Officer",
   setTeacherRole,
   isEditingName,
   setIsEditingName,
@@ -21,18 +21,18 @@ const SettingsComponent = ({
   const navigate = useNavigate();
 
   const [safeName, setSafeName] = useState(teacherName);
-  const [email, setEmail] = useState("teacher@school.edu");
+  const [email, setEmail] = useState("officer@school.edu");
   const [role, setRole] = useState(teacherRole);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setSafeName(teacherName || "Teacher");
+    setSafeName(teacherName || "Faculty Officer");
   }, [teacherName]);
 
   useEffect(() => {
-    setRole(teacherRole || "Class Teacher");
+    setRole(teacherRole || "Officer");
   }, [teacherRole]);
 
   const handleSaveAll = async () => {
@@ -54,7 +54,7 @@ const SettingsComponent = ({
 
   const handleCancel = () => {
     setSafeName(teacherName);
-    setEmail("teacher@school.edu");
+    setEmail("officer@school.edu");
     setRole(teacherRole);
     setIsEditingName(false);
     setIsEditingEmail(false);

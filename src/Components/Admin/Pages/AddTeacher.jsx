@@ -22,7 +22,7 @@ const AddTeacher = ({ onAddTeacher }) => {
     <div className="bg-gray-900 border border-green-500/30 rounded-lg p-6 shadow-xl">
       <div className="flex items-center gap-2 mb-4">
         <UserPlus className="w-5 h-5 text-green-400" />
-        <h2 className="text-xl font-semibold text-green-400">Add Teacher</h2>
+        <h2 className="text-xl font-semibold text-green-400">Add Faculty Officer</h2>
       </div>
       <div className="space-y-4">
         <div>
@@ -79,7 +79,7 @@ const AddTeacher = ({ onAddTeacher }) => {
           onClick={handleSubmit}
           className="w-full bg-green-500 hover:bg-green-600 text-black font-semibold py-2 px-4 rounded transition-colors shadow-lg shadow-green-500/30"
         >
-          Add Teacher
+          Add Faculty Officer
         </button>
       </div>
     </div>

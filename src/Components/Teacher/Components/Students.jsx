@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { Users, Award, X } from "lucide-react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 const Students = ({ classInfo = {}, onNominateCandidate }) => {
+  const location = useLocation(); // Used to detect navigation
   const [students, setStudents] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -84,9 +86,10 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
 
 
   // -------- FETCH STUDENTS FROM BACKEND --------
+  // Refetch whenever location changes (user navigates to this page)
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [location.key]);
 
   const fetchStudents = async () => {
     try {

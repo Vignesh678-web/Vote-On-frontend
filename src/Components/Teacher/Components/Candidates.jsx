@@ -248,9 +248,14 @@ const Candidates = () => {
           </div>
 
           <div>
-            <h3 className="text-2xl font-bold text-white">
-              Approved Candidates
-            </h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-2xl font-bold text-white">
+                Approved Candidates
+              </h3>
+              <span className="px-3 py-1 bg-green-500/20 border border-green-500/40 rounded-full text-green-400 text-sm font-bold">
+                {candidates.length}
+              </span>
+            </div>
             <p className="text-sm text-purple-400">
               Candidates approved by admin
             </p>

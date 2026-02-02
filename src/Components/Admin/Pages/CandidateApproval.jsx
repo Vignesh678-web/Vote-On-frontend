@@ -56,7 +56,7 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
       setCandidates(prev =>
         prev.map(c =>
           c._id === studentId
-            ? { ...c, isApproved: true, electionStatus: "Active" }
+            ? { ...c, iscandidate: true, isApproved: true, electionStatus: "Active" }
             : c
         )
       );
@@ -131,9 +131,11 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
   // FILTER BY STATUS
   const filteredCandidates = candidates.filter((c) => {
     if (activeTab === "pending") {
-      return c.iscandidate === true && c.isApproved === false;
+      // Pending = iscandidate true AND isApproved is false/undefined/null AND not rejected
+      return c.iscandidate === true && !c.isApproved && c.electionStatus !== "Rejected";
     }
     if (activeTab === "approved") {
+      // Approved = iscandidate true AND isApproved true
       return c.iscandidate === true && c.isApproved === true;
     }
     if (activeTab === "rejected") {
@@ -143,7 +145,7 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
   });
 
   // Count badges
-  const pendingCount = candidates.filter(c => c.iscandidate === true && c.isApproved === false).length;
+  const pendingCount = candidates.filter(c => c.iscandidate === true && !c.isApproved && c.electionStatus !== "Rejected").length;
   const approvedCount = candidates.filter(c => c.iscandidate === true && c.isApproved === true).length;
 
   if (loading) {

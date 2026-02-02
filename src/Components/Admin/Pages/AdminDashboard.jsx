@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import AdminLayout from "./AdminLayout";
 import DashboardHome from "./DashboardHome";
 import FacultyManagement from "./FacultyManagement";
 import ElectionMonitor from "./ElectionMonitor";
-import Results from "./Result";
+import Result from "./Result";
 import AdminSettings from "./AdminSetting";
 import CandidateApprovalSection from "./CandidateApproval";
 import AdminTeachers from "./AdminTeachers";
-import CandidateParticipationTracker from "./CandidateParticipationTracker";
+import AuditLogs from "./AuditLogs";
 import CollegeVoting from "../Pages/CollegeVoting";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [teachers, setTeachers] = useState([]);
   const [elections, setElections] = useState([]);
@@ -20,6 +22,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    const isAuthorized = role === 'admin' || role === 'teacher';
+
+    if (!token || !isAuthorized) {
+      console.error("[DASHBOARD] Access denied. Redirecting to login...");
+      navigate("/"); // Redirect to main login page
+      return;
+    }
+
     fetchStats();
   }, []);
 
@@ -28,6 +41,12 @@ export default function AdminDashboard() {
       setLoading(true);
 
       const token = localStorage.getItem("token");
+      if (!token) {
+        console.warn("[DASHBOARD] No token found in localStorage");
+        setLoading(false);
+        return;
+      }
+
       const headers = {
         Authorization: `Bearer ${token}`,
       };
@@ -63,7 +82,8 @@ export default function AdminDashboard() {
       setElections(allElections);
       setResults(allElections.filter(e => e.status === "Completed"));
     } catch (error) {
-      console.error("Failed to load dashboard data:", error);
+      console.error("Dashboard Fetch Error:", error.response?.data || error.message);
+      // If unauthorized, could redirect to login here
     } finally {
       setLoading(false);
     }
@@ -117,9 +137,7 @@ export default function AdminDashboard() {
       case "faculty":
         return (
           <FacultyManagement
-            teachers={teachers}
-            onAddTeacher={handleAddTeacher}
-            onToggleBlock={handleToggleBlock}
+            refreshData={fetchStats}
           />
         );
 
@@ -132,13 +150,14 @@ export default function AdminDashboard() {
         );
 
       case "collegeVoting":
-        return <CollegeVoting />;
+        return <CollegeVoting refreshData={fetchStats} />;
 
       case "results":
         return (
-          <Results
+          <Result
             results={results}
             onPrintPDF={handlePrintPDF}
+            refreshData={fetchStats}
           />
         );
 
@@ -153,8 +172,8 @@ export default function AdminDashboard() {
           />
         );
 
-      case "candidateParticipationTracker":
-        return <CandidateParticipationTracker />;
+      case "auditLogs":
+        return <AuditLogs />;
 
       case "settings":
         return <AdminSettings />;

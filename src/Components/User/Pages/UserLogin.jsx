@@ -117,7 +117,7 @@ export default function UserLogin() {
     }
 
     if (tab === "faculty" && (!data.facultyId || !data.password)) {
-      alert("Faculty ID and password are required");
+      alert("Faculty Officer ID and password are required");
       return;
     }
 
@@ -158,6 +158,7 @@ export default function UserLogin() {
       // OPTIONAL: save user info safely
       if (tab === "student" && res.student) {
         localStorage.setItem("student", JSON.stringify(res.student));
+        localStorage.setItem("userId", res.student._id);
       }
 
       if (tab === "admin" && res.admin) {
@@ -295,18 +296,18 @@ export default function UserLogin() {
     const tabTitles = {
       student: 'Student Login',
       admin: 'Admin Login',
-      faculty: 'Faculty Login'
+      faculty: 'Faculty Officer Login'
     };
     const buttonLabels = {
       student: "Student login",
       admin: "Admin Login",
-      faculty: "Faculty Login"
+      faculty: "Faculty Officer Login"
     };
 
     const placeholders = {
       student: { admissionNumber: 'Enter your admission no', password: 'Enter your password' },
       admin: { adminId: 'Enter admin ID', password: 'Enter admin password' },
-      faculty: { facultyId: 'Enter faculty ID', password: 'Enter faculty password' }
+      faculty: { facultyId: 'Enter officer ID', password: 'Enter password' }
     };
 
     const idField =
@@ -411,7 +412,7 @@ export default function UserLogin() {
                 className={`tab-button ${activeTab === 'faculty' ? 'active' : ''}`}
                 onClick={() => setActiveTab('faculty')}
               >
-                Faculty
+                Faculty Officer
               </button>
             </div>
           )}

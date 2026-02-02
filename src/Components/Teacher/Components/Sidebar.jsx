@@ -32,7 +32,6 @@ const Sidebar = ({
       badge: safeCandidates.filter(c => c.status === "pending").length
     },
     { id: "elections", label: "Manage Election", icon: Vote, description: "Create & control elections" },
-    { id: "upload", label: "Upload Data", icon: Upload, description: "Import student data" },
     { id: "results", label: "Election Results", icon: Vote, description: "View results" },
     { id: "settings", label: "Settings", icon: Settings, description: "Preferences" },
   ];

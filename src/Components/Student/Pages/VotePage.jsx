@@ -58,10 +58,12 @@ export default function VotePage() {
           setCandidates(electionCandidates);
 
           // Check if user has already voted in this election
-          const hasVotedInElection = data.election.voters?.some(
-            v => v.student === localStorage.getItem('userId')
-          );
-          setHasVoted(hasVotedInElection);
+          const currentUserId = localStorage.getItem('userId');
+          const hasVotedInElection = data.election.voters?.some(v => {
+            const vStudentId = v.student?._id || v.student;
+            return vStudentId === currentUserId;
+          });
+          setHasVoted(!!hasVotedInElection);
         }
       } catch (err) {
         console.error('Error fetching election:', err);

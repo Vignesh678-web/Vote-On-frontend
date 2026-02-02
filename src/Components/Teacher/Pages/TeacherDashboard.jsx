@@ -14,7 +14,7 @@ import UploadData from "../Components/Upload";
 import Results from "../Components/Results";
 import Settings from "../Components/Settings";
 
-const TeacherDashboard = ({
+const FacultyOfficerDashboard = ({
   teacherName,
   teacherRole,
   classInfo,
@@ -190,7 +190,7 @@ const TeacherDashboard = ({
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4 text-green-400">
           <div className="w-12 h-12 border-4 border-green-500/20 border-t-green-500 rounded-full animate-spin"></div>
-          <p className="font-mono text-sm tracking-widest uppercase">Initializing Dashboard Vault...</p>
+          <p className="font-mono text-sm tracking-widest uppercase">Initializing Officer Vault...</p>
         </div>
       );
     }
@@ -236,8 +236,6 @@ const TeacherDashboard = ({
           />
         );
 
-      case "upload":
-        return <UploadData />;
 
       case "results":
         if (allElections.length === 0) {
@@ -379,4 +377,4 @@ const TeacherDashboard = ({
   );
 };
 
-export default TeacherDashboard;
+export default FacultyOfficerDashboard;

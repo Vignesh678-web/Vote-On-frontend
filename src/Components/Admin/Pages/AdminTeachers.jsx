@@ -28,10 +28,10 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
             className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00ff41]"
             style={{ textShadow: "0 0 20px rgba(0,255,65,0.5)" }}
           >
-            Teachers Management
+            Faculty Officers Management
           </h1>
           <p className="text-gray-400 text-sm sm:text-base mt-2">
-            View and manage all teachers in the system
+            View and manage all faculty officers in the system
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -39,7 +39,7 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
             <span className="text-[#00ff41] font-bold text-lg">
               {teachers.length}
             </span>
-            <span className="text-gray-400 text-sm ml-2">Teachers</span>
+            <span className="text-gray-400 text-sm ml-2">Officers</span>
           </div>
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
       {filteredTeachers.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-400 text-lg">
-            No teachers found matching your search.
+            No officers found matching your search.
           </p>
         </div>
       )}
@@ -157,7 +157,7 @@ export default function AdminTeachers({ teachers = [], onRemoveTeacher }) {
                 className="text-2xl font-bold text-[#00ff41]"
                 style={{ textShadow: "0 0 15px rgba(0,255,65,0.3)" }}
               >
-                Teacher Details
+                Officer Details
               </h2>
               <button
                 onClick={() => setSelectedTeacher(null)}
