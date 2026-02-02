@@ -247,8 +247,13 @@ export default function ManageElections() {
                       <p className="text-gray-600 text-xs italic">No candidates added yet.</p>
                     ) : (
                       election.candidates.map((c, i) => (
-                        <span key={c.student?._id || i} className="bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs border border-gray-700">
-                          {c.student?.name || "Deleted Student"}
+                        <span key={c.student?._id || i} className="bg-gray-800 text-gray-300 px-3 py-1.5 rounded-lg text-xs border border-gray-700 flex items-center gap-2">
+                          <span className="font-medium">{c.student?.name || "Deleted Student"}</span>
+                          {c.student?.className && (
+                            <span className="bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                              {c.student.className}{c.student.section ? ` - ${c.student.section}` : ''}
+                            </span>
+                          )}
                         </span>
                       ))
                     )}
@@ -389,7 +394,7 @@ export default function ManageElections() {
                   <option value="">-- Choose Candidate --</option>
                   {candidates.map(c => (
                     <option key={c._id} value={c._id}>
-                      {c.name} ({c.position}) - {c.className} {c.section}
+                      {c.name} • {c.className || 'N/A'} {c.section || ''} • {c.position || 'No Position'}
                     </option>
                   ))}
                 </select>

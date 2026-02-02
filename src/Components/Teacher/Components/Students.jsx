@@ -117,6 +117,8 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
           id: s._id,
           name: s.name,
           admission: s.admissionNumber,
+          className: s.className || "—",
+          section: s.section || "—",
           attendance,
           eligible: attendance >= 75,
           nominated: nominated.includes(s._id), // 👈 frontend-only truth
@@ -191,6 +193,8 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
             <tr className="bg-green-500/10 border-b border-green-500/30">
               <th className="px-6 py-4 text-left text-green-400">Name</th>
               <th className="px-6 py-4 text-left text-green-400">Admission No</th>
+              <th className="px-6 py-4 text-left text-green-400">Class</th>
+              <th className="px-6 py-4 text-left text-green-400">Section</th>
               <th className="px-6 py-4 text-left text-green-400">Attendance</th>
               <th className="px-6 py-4 text-left text-green-400">Status</th>
               <th className="px-6 py-4 text-left text-green-400">Actions</th>
@@ -201,6 +205,16 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
               <tr key={student.id} className="border-b border-green-500/10">
                 <td className="px-6 py-4 text-white">{student.name}</td>
                 <td className="px-6 py-4 text-gray-300">{student.admission}</td>
+                <td className="px-6 py-4">
+                  <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded text-xs font-semibold">
+                    {student.className}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs font-semibold">
+                    {student.section}
+                  </span>
+                </td>
                 <td className="px-6 py-4 text-gray-300">{student.attendance}%</td>
                 <td className="px-6 py-4">
                   {student.eligible ? (
@@ -228,7 +242,7 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
 
             {filteredStudents.length === 0 && (
               <tr>
-                <td className="px-6 py-6 text-gray-400 text-center" colSpan="5">
+                <td className="px-6 py-6 text-gray-400 text-center" colSpan="7">
                   No students found
                 </td>
               </tr>
