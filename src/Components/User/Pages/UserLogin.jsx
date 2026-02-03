@@ -2,16 +2,80 @@ import { useState } from 'react';
 import "../Components/Styles/Login.css"
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Eye, EyeOff, GraduationCap, ShieldCheck, Users, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const PeopleAnimation = () => {
+  const items = [
+    { icon: GraduationCap, color: '#0b5842' },
+    { icon: ShieldCheck, color: '#1d4ed8' },
+    { icon: Users, color: '#7c3aed' },
+    { icon: User, color: '#059669' },
+  ];
+
+  return (
+    <div className="people-animation-container">
+      {Array.from({ length: 20 }).map((_, i) => {
+        const Item = items[i % items.length];
+        return (
+          <motion.div
+            key={i}
+            className="floating-item"
+            initial={{
+              x: Math.random() * 100 + "%",
+              y: Math.random() * 100 + "%",
+              opacity: 0,
+              scale: Math.random() * 0.5 + 0.5,
+            }}
+            animate={{
+              y: ["-10%", "110%"],
+              opacity: [0, 0.2, 0.2, 0],
+              rotate: [0, 360],
+            }}
+            transition={{
+              duration: Math.random() * 20 + 20,
+              repeat: Infinity,
+              ease: "linear",
+              delay: Math.random() * 20,
+            }}
+            style={{
+              position: 'absolute',
+              color: Item.color,
+              pointerEvents: 'none',
+              filter: 'blur(1px)',
+            }}
+          >
+            <Item.icon size={Math.random() * 30 + 20} />
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default function UserLogin() {
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('student');
   const [showRegistration, setShowRegistration] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    student: false,
+    admin: false,
+    faculty: false,
+    registration: false
+  });
+
+  const togglePasswordVisibility = (type) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  };
+
   const [formData, setFormData] = useState({
     student: { admissionNumber: '', password: '' },
     admin: { adminId: '', password: '' },
-    faculty: { facultyId: '', password: '', rememberMe: false }
+    faculty: { facultyId: '', password: '' }
   });
 
   const [registrationData, setRegistrationData] = useState({
@@ -235,16 +299,21 @@ export default function UserLogin() {
             />
           </div>
 
-          <div className="form-field">
-
-            {/* password field */}
+          <div className="form-field password-field">
             <input
-              type="password"
+              type={showPassword.registration ? "text" : "password"}
               value={registrationData.password}
               onChange={(e) => handleRegistrationChange('password', e.target.value)}
               className="form-input"
               placeholder="Enter your password"
             />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => togglePasswordVisibility('registration')}
+            >
+              {showPassword.registration ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
           <div className='form-field'>
@@ -330,35 +399,29 @@ export default function UserLogin() {
         </div>
         <div className="form-content">
           {/* Password Field */}
-          <div className="form-field">
+          <div className="form-field password-field">
             <input
-              type="password"
+              type={showPassword[tabType] ? "text" : "password"}
               id={`${tabType}-password`}
               value={currentData.password}
               onChange={(e) => handleInputChange(tabType, 'password', e.target.value)}
               className="form-input"
               placeholder={placeholders[tabType].password}
             />
-          </div>
-
-          {/* Remember Me Checkbox */}
-          <div className="checkbox-container">
-            <input
-              type="checkbox"
-              id={`${tabType}-remember`}
-              checked={currentData.rememberMe}
-              onChange={(e) => handleInputChange(tabType, 'rememberMe', e.target.checked)}
-              className="checkbox-input"
-            />
-            <label htmlFor={`${tabType}-remember`} className="checkbox-label">
-              Remember me
-            </label>
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => togglePasswordVisibility(tabType)}
+            >
+              {showPassword[tabType] ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
           {/* Login Button */}
           <button
             onClick={() => handleSubmit(tabType)}
             className="login-button"
+            style={{ marginTop: '1rem' }}
           >
             {buttonLabels[tabType]}
           </button>
@@ -388,9 +451,36 @@ export default function UserLogin() {
   return (
     <div className="login-container">
       <div className="form-section">
-        <div className="form-container">
+        <PeopleAnimation />
+        <motion.div 
+          className="form-container"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="logo-container">
-            <div className="logo"></div>
+            <motion.div 
+              className="logo"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ 
+                scale: [1, 1.05, 1],
+                opacity: 1,
+                rotate: [0, -1, 1, 0]
+              }}
+              transition={{ 
+                initial: { duration: 0.5 },
+                scale: { 
+                  duration: 4, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                },
+                rotate: {
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
+            ></motion.div>
           </div>
 
           {/* Show tabs only when not in registration mode */}
@@ -418,8 +508,18 @@ export default function UserLogin() {
           )}
 
           {/* Render registration form or login form */}
-          {showRegistration ? renderRegistrationForm() : renderLoginForm(activeTab)}
-        </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={showRegistration ? 'registration' : activeTab}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {showRegistration ? renderRegistrationForm() : renderLoginForm(activeTab)}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );
