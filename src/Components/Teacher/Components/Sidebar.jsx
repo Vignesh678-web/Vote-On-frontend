@@ -10,6 +10,7 @@ import {
   Home,
   ChevronRight,
   Vote,
+  Trophy,
 } from "lucide-react";
 import logo from "../Assets/logo.png";
 
@@ -19,11 +20,12 @@ const Sidebar = ({
   sidebarOpen,
   setSidebarOpen,
   candidates,
+  role
 }) => {
 
   const safeCandidates = candidates || [];
 
-  const menuItems = [
+  const allMenuItems = [
     { id: "overview", label: "Overview", icon: Home, description: "Dashboard overview" },
     { id: "students", label: " Class Students", icon: Users, description: "Manage student data" },
     { id: "attendance", label: "Manage Attendance", icon: Percent, description: "Track attendance" },
@@ -32,9 +34,18 @@ const Sidebar = ({
       badge: safeCandidates.filter(c => c.status === "pending").length
     },
     { id: "elections", label: "Manage Election", icon: Vote, description: "Create & control elections" },
+    { id: "college-elections", label: "College Election", icon: Trophy, description: "Institution-wide polls" },
     { id: "results", label: "Election Results", icon: Vote, description: "View results" },
     { id: "settings", label: "Settings", icon: Settings, description: "Preferences" },
   ];
+
+  // Filter menu items based on role
+  const menuItems = allMenuItems.filter(item => {
+    if (item.id === "elections" || item.id === "college-elections") {
+      return role === "returning_officer";
+    }
+    return true;
+  });
 
   return (
     <>

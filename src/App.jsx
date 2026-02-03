@@ -2,7 +2,8 @@ import { Route, Routes, Navigate } from 'react-router-dom'
 import './App.css'
 import UserLogin from './Components/User/Pages/UserLogin'
 import Otp from './Components/User/Pages/Otp'
-import FacultyOfficerDashboard from './Components/Teacher/Pages/TeacherDashboard'
+import ReturningOfficerDashboard from './Components/Teacher/Pages/ReturningOfficerDashboard'
+import TeacherDashboard from './Components/Teacher/Pages/TeacherDashboard'
 import StudentDashboard from './Components/Student/StudentDashboard'
 import VotePage from './Components/Student/Pages/VotePage' 
 import AdminDashboard from './Components/Admin/Pages/AdminDashboard'
@@ -18,7 +19,7 @@ const LoginRedirect = ({ defaultTab = 'student', allowAccess = false }) => {
   // Resolve token based on stored role or fallback
   const token = (storedRole === 'student' ? localStorage.getItem('usertoken') : null) || 
                 (storedRole === 'admin'   ? localStorage.getItem('admintoken') : null) || 
-                (storedRole === 'teacher' ? localStorage.getItem('teachertoken') : null) ||
+                (storedRole === 'teacher' || storedRole === 'returning_officer' ? localStorage.getItem('teachertoken') : null) ||
                 localStorage.getItem('usertoken') || 
                 localStorage.getItem('admintoken') || 
                 localStorage.getItem('teachertoken') ||
@@ -37,6 +38,7 @@ const LoginRedirect = ({ defaultTab = 'student', allowAccess = false }) => {
   if (!allowAccess && token && effectiveRole) {
     if (effectiveRole === 'student') return <Navigate to="/studentDashboard" replace />;
     if (effectiveRole === 'admin') return <Navigate to="/adminDashboard" replace />;
+    if (effectiveRole === 'returning_officer') return <Navigate to="/returningDashboard" replace />;
     if (effectiveRole === 'teacher') return <Navigate to="/teacherDashboard" replace />;
   }
   return <UserLogin initialTab={defaultTab} />;
@@ -50,13 +52,20 @@ function App() {
         <Route path="/UserLogin" element={<LoginRedirect />} />
         <Route path="/student/login" element={<LoginRedirect defaultTab="student" allowAccess={true} />} />
         <Route path="/admin/login" element={<LoginRedirect defaultTab="admin" allowAccess={true} />} />
-        <Route path="/faculty/login" element={<LoginRedirect defaultTab="faculty" allowAccess={true} />} />
+        <Route path="/returning/login" element={<LoginRedirect defaultTab="returning" allowAccess={true} />} />
+        <Route path="/teacher/login" element={<LoginRedirect defaultTab="teacher" allowAccess={true} />} />
         <Route path="/OtpLogin" element={<Otp />} />
         
         {/* Protected Routes */}
+        <Route path="/returningDashboard" element={
+          <ProtectedRoute allowedRoles={['returning_officer']}>
+            <ReturningOfficerDashboard />
+          </ProtectedRoute>
+        } />
+
         <Route path="/teacherDashboard" element={
           <ProtectedRoute allowedRoles={['teacher']}>
-            <FacultyOfficerDashboard />
+            <TeacherDashboard />
           </ProtectedRoute>
         } />
         

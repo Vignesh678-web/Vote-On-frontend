@@ -22,7 +22,7 @@ axios.interceptors.request.use(
       let activeToken = null;
       if (path.includes('student')) {
         activeToken = localStorage.getItem('usertoken');
-      } else if (path.includes('teacher')) {
+      } else if (path.includes('teacher') || path.includes('returning')) {
         activeToken = localStorage.getItem('teachertoken');
       } else if (path.includes('admin')) {
         activeToken = localStorage.getItem('admintoken');
@@ -76,7 +76,8 @@ axios.interceptors.response.use(
       setTimeout(() => {
         let target = '/UserLogin';
         if (path.includes('admin')) target = '/admin/login';
-        else if (path.includes('teacher')) target = '/faculty/login';
+        else if (path.includes('teacher')) target = '/teacher/login';
+        else if (path.includes('returning')) target = '/returning/login';
         else if (path.includes('student')) target = '/student/login';
         
         window.location.href = target; 

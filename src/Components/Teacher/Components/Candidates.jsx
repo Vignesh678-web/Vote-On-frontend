@@ -20,6 +20,7 @@ const Candidates = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
+  const [statusTab, setStatusTab] = useState("approved"); // New tab state
 
 
   const [candidateBio, setCandidateBio] = useState("");
@@ -77,7 +78,7 @@ const Candidates = () => {
 
   useEffect(() => {
     fetchApprovedCandidates();
-  }, []);
+  }, [statusTab]);
 
   const fetchApprovedCandidates = async () => {
     try {
@@ -106,11 +107,14 @@ const Candidates = () => {
       }
 
       // Filter to only show approved candidates who are still candidates
-      const approvedCandidates = rawCandidates.filter(
-        (c) => c.iscandidate === true && c.isApproved === true
-      );
+      const filtered = rawCandidates.filter((c) => {
+        if (statusTab === "approved") return c.iscandidate === true && c.isApproved === true;
+        if (statusTab === "pending") return c.iscandidate === true && c.isApproved === false && c.electionStatus !== "Rejected";
+        if (statusTab === "rejected") return c.electionStatus === "Rejected";
+        return false;
+      });
 
-      const normalized = approvedCandidates.map((c) => {
+      const normalized = filtered.map((c) => {
         const manifestoArray = Array.isArray(c.manifestoPoints)
           ? c.manifestoPoints.filter(Boolean)
           : [];
@@ -250,16 +254,40 @@ const Candidates = () => {
           <div>
             <div className="flex items-center gap-3">
               <h3 className="text-2xl font-bold text-white">
-                Approved Candidates
+                Candidate Management
               </h3>
-              <span className="px-3 py-1 bg-green-500/20 border border-green-500/40 rounded-full text-green-400 text-sm font-bold">
-                {candidates.length}
-              </span>
             </div>
             <p className="text-sm text-purple-400">
-              Candidates approved by admin
+              Manage and track candidate nominations
             </p>
           </div>
+        </div>
+
+        {/* Status Tabs */}
+        <div className="flex gap-4 mt-8">
+          {[
+            { id: "approved", label: "Approved", icon: CheckCircle },
+            { id: "pending", label: "Pending", icon: AlertTriangle },
+            { id: "rejected", label: "Rejected", icon: XCircle },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
+                statusTab === tab.id
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20"
+                  : "bg-gray-800 text-gray-400 hover:bg-gray-750"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+              {statusTab === tab.id && (
+                <span className="ml-2 bg-white/20 px-2 py-0.5 rounded text-xs">
+                  {candidates.length}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -267,11 +295,15 @@ const Candidates = () => {
       {candidates.length === 0 ? (
         <div className="bg-gray-900 border border-green-500/30 rounded-xl p-12 text-center">
           <Award className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h4 className="text-xl font-bold text-gray-400 mb-2">
-            No Approved Candidates
+          <h4 className="text-xl font-bold text-gray-400 mb-2 uppercase tracking-tight">
+            No {statusTab} Candidates
           </h4>
           <p className="text-gray-500">
-            Candidates will appear here once approved by admin
+            {statusTab === "approved" 
+              ? "Candidates will appear here once approved by admin" 
+              : statusTab === "pending" 
+              ? "Newly nominated students awaiting review will show up here"
+              : "Nominations that were not accepted are listed here"}
           </p>
         </div>
       ) : (
@@ -321,13 +353,25 @@ const Candidates = () => {
                     
                     {/* Status Badge */}
                     <div className="flex items-center gap-2">
-                      {isCandidateIncomplete(candidate) ? (
+                       {statusTab === "pending" && (
                         <span className="px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-full text-xs font-bold flex items-center gap-1">
-                          <XCircle className="w-3 h-3" /> Incomplete
+                          <AlertTriangle className="w-3 h-3" /> Pending Review
                         </span>
-                      ) : (
+                      )}
+                      {statusTab === "approved" && (
                         <span className="px-3 py-1 bg-green-500/20 border border-green-500/30 text-green-400 rounded-full text-xs font-bold flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3" /> Complete
+                          <CheckCircle className="w-3 h-3" /> Approved
+                        </span>
+                      )}
+                      {statusTab === "rejected" && (
+                        <span className="px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 rounded-full text-xs font-bold flex items-center gap-1">
+                          <XCircle className="w-3 h-3" /> Rejected
+                        </span>
+                      )}
+
+                      {isCandidateIncomplete(candidate) && statusTab !== "rejected" && (
+                        <span className="px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-full text-xs font-bold flex items-center gap-1">
+                          <FileText className="w-3 h-3" /> Needs Info
                         </span>
                       )}
                     </div>

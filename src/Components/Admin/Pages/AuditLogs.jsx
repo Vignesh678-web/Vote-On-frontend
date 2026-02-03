@@ -98,6 +98,43 @@ const AuditLogs = () => {
     log.performedBy.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const exportToCSV = () => {
+    if (filteredLogs.length === 0) {
+      toast.error('No logs available to export');
+      return;
+    }
+
+    try {
+      const headers = ['Timestamp', 'Module', 'Action', 'Details', 'Performed By', 'Role'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredLogs.map(log => [
+          `"${new Date(log.timestamp).toLocaleString().replace(/"/g, '""')}"`,
+          `"${log.module.replace(/"/g, '""')}"`,
+          `"${log.action.replace(/_/g, ' ').replace(/"/g, '""')}"`,
+          `"${log.details.replace(/"/g, '""')}"`,
+          `"${log.performedBy.replace(/"/g, '""')}"`,
+          `"${log.role.replace(/"/g, '""')}"`
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `election_audit_logs_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Audit trail exported successfully');
+    } catch (err) {
+      console.error('Export error:', err);
+      toast.error('Decryption for export failed');
+    }
+  };
+
   return (
     <div className="min-h-screen pb-12 space-y-8 animate-in fade-in duration-500">
       <Toaster position="top-right" />
@@ -122,7 +159,10 @@ const AuditLogs = () => {
           >
             <RefreshCw className={`w-5 h-5 ${loading && 'animate-spin'}`} />
           </button>
-          <button className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all">
+          <button 
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all"
+          >
             <Download className="w-4 h-4" />
             Export CSV
           </button>
@@ -144,7 +184,7 @@ const AuditLogs = () => {
           </div>
           
           <div className="flex items-center gap-2 p-1 bg-slate-950 border border-slate-800 rounded-2xl overflow-x-auto max-w-full no-scrollbar">
-            {['all', 'election', 'candidate', 'auth', 'student', 'teacher', 'vote', 'system'].map((mod) => (
+            {['all', 'election', 'candidate', 'auth', 'system'].map((mod) => (
               <button
                 key={mod}
                 onClick={() => {

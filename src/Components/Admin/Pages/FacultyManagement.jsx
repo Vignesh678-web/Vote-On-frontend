@@ -36,7 +36,10 @@ const FacultyManagement = ({ refreshData }) => {
     Name: '',
     department: '',
     password: '',
-    email: ''
+    email: '',
+    role: 'returning_officer',
+    className: '',
+    section: ''
   });
 
   const fetchTeachers = async () => {
@@ -100,7 +103,16 @@ const FacultyManagement = ({ refreshData }) => {
       );
 
       toast.success(`${formData.Name} added to faculty`);
-      setFormData({ facultyId: '', Name: '', department: '', password: '', email: '' });
+      setFormData({ 
+        facultyId: '', 
+        Name: '', 
+        department: '', 
+        password: '', 
+        email: '', 
+        role: 'returning_officer',
+        className: '',
+        section: ''
+      });
       setShowAddForm(false);
       fetchTeachers();
       if (refreshData) refreshData();
@@ -256,6 +268,48 @@ const FacultyManagement = ({ refreshData }) => {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Authority Role *</label>
+              <div className="relative group">
+                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-400" />
+                <select 
+                  value={formData.role}
+                  onChange={e => setFormData({...formData, role: e.target.value})}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-12 pr-4 text-white outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
+                >
+                  <option value="returning_officer">Returning Officer</option>
+                  <option value="teacher">Class Teacher</option>
+                </select>
+              </div>
+            </div>
+
+            {formData.role === 'teacher' && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Class Assignment</label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="e.g. BCA"
+                    value={formData.className}
+                    onChange={e => setFormData({...formData, className: e.target.value.toUpperCase()})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white outline-none focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Section</label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="e.g. A"
+                    value={formData.section}
+                    onChange={e => setFormData({...formData, section: e.target.value.toUpperCase()})}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white outline-none focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+              </>
+            )}
+
             <div className="flex items-end">
               <button 
                 disabled={isSubmitting}
@@ -353,8 +407,11 @@ const FacultyManagement = ({ refreshData }) => {
                           {!teacher.isBlocked && <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full" />}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{teacher.name}</p>
-                          <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                          <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{teacher.name}</p>
+                          <p className="text-[10px] text-emerald-500/80 font-black uppercase tracking-widest mt-0.5">
+                            {teacher.role === 'returning_officer' ? 'Returning Officer' : 'Class Teacher'}
+                          </p>
+                          <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-1">
                             <Mail className="w-3 h-3" /> {teacher.email || 'No email provided'}
                           </p>
                         </div>

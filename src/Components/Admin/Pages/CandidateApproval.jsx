@@ -166,6 +166,7 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
   // Count badges
   const pendingCount = candidates.filter(c => c.iscandidate === true && !c.isApproved && c.electionStatus !== "Rejected").length;
   const approvedCount = candidates.filter(c => c.iscandidate === true && c.isApproved === true).length;
+  const rejectedCount = candidates.filter(c => c.electionStatus === "Rejected").length;
 
   if (loading) {
     return (
@@ -227,13 +228,20 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
         </button>
         <button
           onClick={() => setActiveTab("rejected")}
-          className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${
+          className={`px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 ${
             activeTab === "rejected"
               ? "bg-red-500 text-white"
               : "bg-gray-800 text-gray-300 hover:bg-gray-700"
           }`}
         >
           Rejected
+          {rejectedCount > 0 && (
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+              activeTab === "rejected" ? "bg-white/20 text-white" : "bg-red-500/20 text-red-400"
+            }`}>
+              {rejectedCount}
+            </span>
+          )}
         </button>
       </div>
 

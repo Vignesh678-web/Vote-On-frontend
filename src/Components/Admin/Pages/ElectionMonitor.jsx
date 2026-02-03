@@ -80,6 +80,9 @@ const ElectionMonitor = () => {
     }
   };
 
+  const userRole = localStorage.getItem("role");
+  const isReadOnly = userRole === 'admin'; // Admin is strictly read-only as requested
+
   if (loading) return <div className="p-10 text-center text-green-400 font-bold"><Loader2 className="animate-spin inline mr-2" /> Loading...</div>;
 
   return (
@@ -87,15 +90,9 @@ const ElectionMonitor = () => {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-6 h-6 text-green-400" />
-          <h2 className="text-2xl font-bold text-green-400">Monitor Elections</h2>
+          <h2 className="text-2xl font-bold text-green-400">{isReadOnly ? 'Election Monitor (View Only)' : 'Conduct Elections'}</h2>
         </div>
         <div className="flex gap-4">
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-green-600 hover:bg-green-500 text-black px-4 py-2 rounded-lg font-bold text-sm"
-          >
-            + Create College Election
-          </button>
           <button
             onClick={fetchElections}
             className="text-xs text-green-400 hover:underline"
@@ -104,39 +101,6 @@ const ElectionMonitor = () => {
           </button>
         </div>
       </div>
-
-      {/* CREATE MODAL */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-green-500 rounded-2xl p-8 max-w-lg w-full">
-            <h3 className="text-2xl font-bold text-white mb-6">Create College Election</h3>
-            <form onSubmit={handleCreateElection} className="space-y-4">
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">Election Title</label>
-                <input required type="text" className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} placeholder="e.g. Student Council President 2026" />
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">Position</label>
-                <input required type="text" className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white" value={formData.position} onChange={e => setFormData({ ...formData, position: e.target.value })} placeholder="e.g. President" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">Start Date</label>
-                  <input required type="datetime-local" className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">End Date</label>
-                  <input required type="datetime-local" className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
-                </div>
-              </div>
-              <div className="flex gap-4 mt-8">
-                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 px-6 py-3 bg-gray-800 text-white rounded-xl font-bold">Cancel</button>
-                <button type="submit" className="flex-1 px-6 py-3 bg-green-600 text-black rounded-xl font-bold">Launch Election</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {elections.length === 0 ? (
@@ -189,24 +153,26 @@ const ElectionMonitor = () => {
                 ))}
               </div>
 
-              <div className="flex gap-2">
-                {election.status === 'Scheduled' && (
-                  <button
-                    onClick={() => handleStartElection(election._id)}
-                    className="flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-2 rounded-lg text-sm flex items-center justify-center gap-2"
-                  >
-                    <Play size={14} /> Start Now
-                  </button>
-                )}
-                {election.status === 'Active' && (
-                  <button
-                    onClick={() => handleDeclareResult(election._id)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg text-sm flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle size={14} /> Declare Result
-                  </button>
-                )}
-              </div>
+              {!isReadOnly && (
+                <div className="flex gap-2">
+                  {election.status === 'Scheduled' && (
+                    <button
+                      onClick={() => handleStartElection(election._id)}
+                      className="flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-2 rounded-lg text-sm flex items-center justify-center gap-2"
+                    >
+                      <Play size={14} /> Start Now
+                    </button>
+                  )}
+                  {election.status === 'Active' && (
+                    <button
+                      onClick={() => handleDeclareResult(election._id)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-lg text-sm flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle size={14} /> Declare Result
+                    </button>
+                  )}
+                </div>
+              )}
 
               {election.status === 'Completed' && election.winner && (
                 <div className="mt-2 text-center py-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">

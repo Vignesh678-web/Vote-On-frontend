@@ -21,7 +21,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const getTokenForRole = (role) => {
     if (role === 'student') return localStorage.getItem('usertoken');
     if (role === 'admin') return localStorage.getItem('admintoken');
-    if (role === 'teacher') return localStorage.getItem('teachertoken');
+    if (role === 'teacher' || role === 'returning_officer') return localStorage.getItem('teachertoken');
     return null;
   };
 
@@ -58,7 +58,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
         navigate('/admin/login', { replace: true });
       } else if (path.includes('teacher')) {
         clearTeacherAuth();
-        navigate('/faculty/login', { replace: true });
+        navigate('/teacher/login', { replace: true });
+      } else if (path.includes('returning')) {
+        clearTeacherAuth();
+        navigate('/returning/login', { replace: true });
       } else if (path.includes('student')) {
         clearStudentAuth();
         navigate('/student/login', { replace: true });
@@ -92,6 +95,12 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
       if (teacherRoleFromToken === 'teacher') {
         effectiveRole = 'teacher';
       }
+    } else if (location.pathname.toLowerCase().includes('returning')) {
+      const returningToken = localStorage.getItem('teachertoken');
+      const returningRoleFromToken = getRoleFromToken(returningToken);
+      if (returningRoleFromToken === 'returning_officer') {
+        effectiveRole = 'returning_officer';
+      }
     } else if (location.pathname.toLowerCase().includes('admin')) {
       const adminToken = localStorage.getItem('admintoken');
       const adminRoleFromToken = getRoleFromToken(adminToken);
@@ -107,7 +116,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
       const homeMap = {
         student: '/studentDashboard',
         admin: '/adminDashboard',
-        teacher: '/teacherDashboard'
+        teacher: '/teacherDashboard',
+        returning_officer: '/returningDashboard'
       };
 
       const targetHome = homeMap[effectiveRole] || '/UserLogin';
@@ -145,6 +155,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     if (path.includes('teacher')) {
       const t = localStorage.getItem('teachertoken');
       if (getRoleFromToken(t) === 'teacher') return 'teacher';
+    }
+    if (path.includes('returning')) {
+      const t = localStorage.getItem('teachertoken');
+      if (getRoleFromToken(t) === 'returning_officer') return 'returning_officer';
     }
     if (path.includes('admin')) {
       const t = localStorage.getItem('admintoken');

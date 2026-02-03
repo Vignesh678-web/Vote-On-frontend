@@ -138,9 +138,6 @@ export default function AdminDashboard() {
           />
         );
 
-      case "collegeVoting":
-        return <CollegeVoting refreshData={fetchStats} />;
-
       case "results":
         return (
           <Result
@@ -149,9 +146,6 @@ export default function AdminDashboard() {
             refreshData={fetchStats}
           />
         );
-
-      case "candidateApproval":
-        return <CandidateApprovalSection />;
 
       case "adminTeacherApproval":
         return (

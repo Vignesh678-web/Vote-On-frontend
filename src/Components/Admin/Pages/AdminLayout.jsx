@@ -10,9 +10,6 @@ export const AdminLayout = ({ activeSection, setActiveSection, children }) => {
     { id: 'faculty', label: 'Officer Management', icon: Users },
     { id: 'elections', label: 'Monitor Elections', icon: BarChart3 },
     { id: 'results', label: 'Results', icon: FileText },
-    { id: 'collegeVoting', label: 'College Election', icon: Trophy },
-    // 🔹 NEW SECTION
-    { id: 'candidateApproval', label: 'Candidate Approval', icon: Award },
     { id: 'auditLogs', label: 'Audit Logs', icon: HistoryIcon },
     { id: 'settings', label: 'Profile & Settings', icon: SettingsIcon },
   ];

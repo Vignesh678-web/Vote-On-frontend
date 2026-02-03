@@ -66,7 +66,8 @@ export default function UserLogin({ initialTab = 'student' }) {
   const [showPassword, setShowPassword] = useState({
     student: false,
     admin: false,
-    faculty: false,
+    returning: false,
+    teacher: false,
     registration: false
   });
 
@@ -80,7 +81,8 @@ export default function UserLogin({ initialTab = 'student' }) {
   const [formData, setFormData] = useState({
     student: { admissionNumber: '', password: '' },
     admin: { adminId: '', password: '' },
-    faculty: { facultyId: '', password: '' }
+    returning: { facultyId: '', password: '' },
+    teacher: { facultyId: '', password: '' }
   });
 
   const [registrationData, setRegistrationData] = useState({
@@ -194,7 +196,8 @@ export default function UserLogin({ initialTab = 'student' }) {
     const urlMap = {
       student: "http://localhost:5000/api/student/login",
       admin: "http://localhost:5000/api/admin/auth/login",
-      faculty: "http://localhost:5000/api/teacher/auth/login",
+      returning: "http://localhost:5000/api/teacher/auth/login",
+      teacher: "http://localhost:5000/api/teacher/auth/login",
     };
 
     try {
@@ -224,7 +227,7 @@ export default function UserLogin({ initialTab = 'student' }) {
       } else if (tab === 'admin') {
         localStorage.removeItem("admintoken");
         localStorage.removeItem("admin");
-      } else if (tab === 'faculty') {
+      } else if (tab === 'returning' || tab === 'teacher') {
         localStorage.removeItem("teachertoken");
         localStorage.removeItem("teacher");
       }
@@ -238,13 +241,15 @@ export default function UserLogin({ initialTab = 'student' }) {
       const tokenKeys = {
         student: "usertoken",
         admin: "admintoken",
-        faculty: "teachertoken"
+        returning: "teachertoken",
+        teacher: "teachertoken"
       };
 
       const roleMap = {
         student: "student",
         admin: "admin",
-        faculty: "teacher"
+        returning: "returning_officer",
+        teacher: "teacher"
       };
 
       localStorage.setItem(tokenKeys[tab], res.token);
@@ -260,8 +265,12 @@ export default function UserLogin({ initialTab = 'student' }) {
         localStorage.setItem("admin", JSON.stringify(res.admin));
       }
 
-      if (tab === "faculty" && res.teacher) {
-        localStorage.setItem("teacher", JSON.stringify(res.teacher));
+      if (tab === "returning" || tab === "teacher") {
+        if (res.teacher) {
+          localStorage.setItem("teacher", JSON.stringify(res.teacher));
+          // Override role in storage from the actual server response if available
+          if (res.teacher.role) localStorage.setItem("role", res.teacher.role);
+        }
       }
 
       // ---- REDIRECTS ----
@@ -275,7 +284,12 @@ export default function UserLogin({ initialTab = 'student' }) {
         return;
       }
 
-      if (tab === "faculty") {
+      if (tab === "returning") {
+        navigate("/returningDashboard");
+        return;
+      }
+
+      if (tab === "teacher") {
         navigate("/teacherDashboard");
         return;
       }
@@ -407,7 +421,8 @@ export default function UserLogin({ initialTab = 'student' }) {
     const placeholders = {
       student: { admissionNumber: 'Enter your admission no', password: 'Enter your password' },
       admin: { adminId: 'Enter admin ID', password: 'Enter admin password' },
-      faculty: { facultyId: 'Enter officer ID', password: 'Enter password' }
+      returning: { facultyId: 'Enter RO ID', password: 'Enter password' },
+      teacher: { facultyId: 'Enter teacher ID', password: 'Enter password' }
     };
 
     const idField =
@@ -532,13 +547,22 @@ export default function UserLogin({ initialTab = 'student' }) {
                 Admin
               </button>
               <button
-                className={`tab-button ${activeTab === 'faculty' ? 'active' : ''}`}
+                className={`tab-button ${activeTab === 'returning' ? 'active' : ''}`}
                 onClick={() => {
-                  setActiveTab('faculty');
-                  navigate('/faculty/login');
+                  setActiveTab('returning');
+                  navigate('/returning/login');
                 }}
               >
-                Faculty Officer
+                Returning Officer
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'teacher' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('teacher');
+                  navigate('/teacher/login');
+                }}
+              >
+                Teacher
               </button>
             </div>
           )}
