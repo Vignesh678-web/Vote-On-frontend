@@ -42,7 +42,7 @@ const FacultyManagement = ({ refreshData }) => {
   const fetchTeachers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       const res = await axios.get("http://localhost:5000/api/admin/teacher/all", {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -68,7 +68,7 @@ const FacultyManagement = ({ refreshData }) => {
 
   const handleToggleBlock = async (teacherId, currentStatus) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(
         `http://localhost:5000/api/admin/teacher/toggle-block/${teacherId}`,
         {},
@@ -92,7 +92,7 @@ const FacultyManagement = ({ refreshData }) => {
 
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/admin/teacher/create",
         formData,

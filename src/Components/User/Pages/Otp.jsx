@@ -16,6 +16,9 @@ const Otp = () => {
 console.log("OTP PAGE STATE:", location.state);
 console.log("EMAIL:", email);
   const admissionNumber = location.state?.admissionNumber;
+  const facultyId = location.state?.facultyId;
+  const role = location.state?.role; // Role passed from Login
+
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -105,7 +108,7 @@ console.log("EMAIL:", email);
     );
 
     if (response.status === 200 && response.data.success) {
-      Navigate("/Admindashboard");
+      Navigate("/adminDashboard");
     }
 
   } catch (err) {
@@ -128,7 +131,7 @@ const handleStudentVerify = async () => {
     );
 
     if (response.status === 200) {
-      Navigate("/UserLogin");
+      Navigate("/student/login");
     }
 
   } catch (err) {

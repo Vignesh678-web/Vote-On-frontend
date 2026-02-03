@@ -33,19 +33,16 @@ const AuditLogs = () => {
   const fetchLogs = async (page = 1) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('admintoken') || 
+                    localStorage.getItem('teachertoken') || 
+                    localStorage.getItem('token');
       
       console.log('[AUDIT] Attempting fetch. Token exists:', !!token);
 
       if (!token) {
-        console.warn('[AUDIT] Standard token missing. checking fallbacks...');
-        const altToken = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
-        if (!altToken) {
-          toast.error('Identity verification failed. Please login again.');
-          setLoading(false);
-          return;
-        }
-        localStorage.setItem('token', altToken);
+        toast.error('Identity verification failed. Please login again.');
+        setLoading(false);
+        return;
       }
 
       const activeToken = token || localStorage.getItem('token');

@@ -22,17 +22,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-
-    const isAuthorized = role === 'admin' || role === 'teacher';
-
-    if (!token || !isAuthorized) {
-      console.error("[DASHBOARD] Access denied. Redirecting to login...");
-      navigate("/"); // Redirect to main login page
-      return;
-    }
-
     fetchStats();
   }, []);
 
@@ -40,9 +29,9 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       if (!token) {
-        console.warn("[DASHBOARD] No token found in localStorage");
+        console.warn("[DASHBOARD] No admin token found in localStorage");
         setLoading(false);
         return;
       }
@@ -103,7 +92,7 @@ export default function AdminDashboard() {
 
   const handleDeclareResult = async electionId => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
       await axios.put(
         `http://localhost:5000/api/elections/${electionId}/end`,

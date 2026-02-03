@@ -16,7 +16,7 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
   const fetchCandidates = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
       const res = await axios.get(
         "http://localhost:5000/api/admin/candidates/get-candidates",
@@ -49,8 +49,13 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
     try {
       setLoadingId(studentId);
 
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:5000/api/admin/candidates/approve/${studentId}`
+        `http://localhost:5000/api/admin/candidates/approve/${studentId}`,
+        {}, // Empty body for PATCH
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
       setCandidates(prev =>
@@ -75,15 +80,24 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
     try {
       setLoadingId(studentId);
 
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:5000/api/admin/candidates/reject/${studentId}`
+        `http://localhost:5000/api/admin/candidates/reject/${studentId}`,
+        {}, // Empty body
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
       setCandidates(prev =>
-        prev.filter(c => c._id !== studentId)
+        prev.map(c =>
+          c._id === studentId
+            ? { ...c, iscandidate: true, isApproved: false, electionStatus: "Rejected" }
+            : c
+        )
       );
 
-      toast.success(`${studentName} rejected`);
+      toast.success(`${studentName} moved to rejected list`);
 
     } catch (err) {
       toast.error(err.response?.data?.message || "Rejection failed");
@@ -97,8 +111,13 @@ const CandidateApproval = ({ initialCandidates = [] }) => {
     try {
       setLoadingId(studentId);
 
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(
-        `http://localhost:5000/api/admin/candidates/revoke/${studentId}`
+        `http://localhost:5000/api/admin/candidates/revoke/${studentId}`,
+        {}, // Empty body
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
       setCandidates(prev =>

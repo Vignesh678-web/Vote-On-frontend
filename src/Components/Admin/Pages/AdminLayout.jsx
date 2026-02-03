@@ -18,11 +18,11 @@ export const AdminLayout = ({ activeSection, setActiveSection, children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-gray-100 flex">
+    <div className="h-screen bg-black text-gray-100 flex overflow-hidden">
       {/* Sidebar */}
       <div
         className={`${
-          isSidebarOpen ? 'w-64' : 'w-20'
+          isSidebarOpen ? 'w-72' : 'w-20'
         } bg-gray-900 border-r border-green-500/30 transition-all duration-300 flex flex-col`}
       >
         <div className="p-6 border-b border-green-500/30">

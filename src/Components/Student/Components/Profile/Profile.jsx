@@ -44,7 +44,7 @@ export default function Profile() {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("usertoken") || localStorage.getItem("token");
       if (!token) return;
 
       const res = await axios.get("http://localhost:5000/api/student/profile", {

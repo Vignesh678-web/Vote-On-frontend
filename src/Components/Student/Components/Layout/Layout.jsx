@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { clearStudentAuth } from "../../../../utils/auth";
 import {
   Home,
   Users,
@@ -26,19 +27,19 @@ export default function Layout({ activeSection, setActiveSection, children }) {
     { id: "profile", label: "Profile", icon: <UserCircle2 size={20} /> },
   ];
 
-  const handleLogout = () => {
-    // 🔥 Clear ONLY student auth (safe & explicit)
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("student");
-    localStorage.removeItem("auth"); // if unified auth exists
 
+
+
+
+  const handleLogout = () => {
+    // 🔐 Clear ONLY student auth
+    clearStudentAuth();
     // Redirect to login
-    navigate("/UserLogin", { replace: true });
+    navigate("/student/login", { replace: true });
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a0a]">
+    <div className="h-screen flex bg-[#0a0a0a] overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -51,7 +52,7 @@ export default function Layout({ activeSection, setActiveSection, children }) {
       <aside
         className={`fixed md:relative z-50 md:z-auto h-full flex flex-col justify-between
         transition-all duration-300 bg-[#111111] border-r border-[#00ff41]/20
-        ${sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0 md:w-20"}`}
+        ${sidebarOpen ? "translate-x-0 w-72" : "-translate-x-full md:translate-x-0 md:w-20"}`}
       >
         {/* Logo */}
         <div>

@@ -1,6 +1,7 @@
 // components/Settings.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import { clearTeacherAuth } from "../../../utils/auth";
 import { 
   Settings, Camera, Edit2, Save, X, LogOut, Mail, User 
 } from 'lucide-react';
@@ -61,14 +62,12 @@ const SettingsComponent = ({
     setIsEditingRole(false);
   };
 
+
   // 🔴 REAL LOGOUT LOGIC (this is what you were missing)
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("teacher");
-    localStorage.removeItem("auth"); // if unified auth exists
-
-    navigate("/UserLogin", { replace: true });
+    // 🔐 Clear ONLY teacher auth
+    clearTeacherAuth();
+    navigate("/faculty/login", { replace: true });
   };
 
   const initials =

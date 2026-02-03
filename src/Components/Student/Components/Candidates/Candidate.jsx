@@ -15,7 +15,7 @@ export default function Candidates() {
   const fetchCandidates = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("usertoken") || localStorage.getItem("token");
       const res = await axios.get("http://localhost:5000/api/candidates/approved", {
         headers: { Authorization: `Bearer ${token}` }
       });

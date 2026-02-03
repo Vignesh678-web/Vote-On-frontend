@@ -47,7 +47,7 @@ const Candidates = () => {
     try {
       setDeleting(candidateId);
       setConfirmDelete(null);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
       await axios.delete(
         `http://localhost:5000/api/teacher/candidates/${candidateId}`,
@@ -81,7 +81,7 @@ const Candidates = () => {
 
   const fetchApprovedCandidates = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
       if (!token) {
         throw new Error("No auth token found");
@@ -153,7 +153,7 @@ const Candidates = () => {
     try {
       setSaving(true);
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
       const formData = new FormData();

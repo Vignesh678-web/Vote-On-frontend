@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Eye, EyeOff, GraduationCap, ShieldCheck, Users, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
 
 const PeopleAnimation = () => {
   const items = [
@@ -53,10 +54,14 @@ const PeopleAnimation = () => {
   );
 };
 
-export default function UserLogin() {
-
+export default function UserLogin({ initialTab = 'student' }) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('student');
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Sync state if prop changes (e.g. route transitions)
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
   const [showRegistration, setShowRegistration] = useState(false);
   const [showPassword, setShowPassword] = useState({
     student: false,
@@ -196,28 +201,54 @@ export default function UserLogin() {
       const response = await axios.post(urlMap[tab], data);
       const res = response.data;
 
-      console.log("LOGIN RESPONSE:", res);
+      console.log("[LOGIN] Response:", res);
 
       if (!res || res.success === false) {
         alert(res?.message || "Login failed");
         return;
       }
 
-      // 🔐 SAVE TOKEN (UNIVERSAL)
+      // 🔐 SESSION MANAGEMENT:
+      // We clear the generic 'token'/'role' keys to ensure the active one is fresh.
+      // We DO NOT clear other role-specific tokens (e.g., admintoken) so that
+      // users can maintain concurrent sessions in different tabs (Multitasking).
+      localStorage.removeItem("token");
+      localStorage.removeItem("role"); 
+      
+      // Also clear the specific data for the role we are about to log in as,
+      // to ensure a clean slate for *this* role.
+      if (tab === 'student') {
+        localStorage.removeItem("usertoken");
+        localStorage.removeItem("student");
+        localStorage.removeItem("userId");
+      } else if (tab === 'admin') {
+        localStorage.removeItem("admintoken");
+        localStorage.removeItem("admin");
+      } else if (tab === 'faculty') {
+        localStorage.removeItem("teachertoken");
+        localStorage.removeItem("teacher");
+      }
+
+      // 🔐 SAVE ROLE-SPECIFIC TOKEN
       if (!res.token) {
         alert("No token received from server");
         return;
       }
 
-      localStorage.setItem("token", res.token);
+      const tokenKeys = {
+        student: "usertoken",
+        admin: "admintoken",
+        faculty: "teachertoken"
+      };
+
       const roleMap = {
         student: "student",
         admin: "admin",
         faculty: "teacher"
       };
 
+      localStorage.setItem(tokenKeys[tab], res.token);
       localStorage.setItem("role", roleMap[tab]);
-
 
       // OPTIONAL: save user info safely
       if (tab === "student" && res.student) {
@@ -427,17 +458,13 @@ export default function UserLogin() {
           </button>
 
           {/* Footer Links */}
-          <div className="form-footer">
-            <button type="button" className="forgot-password">
-              Forgot your password?
-            </button>
+          <div className="form-footer" style={{ justifyContent: 'center' }}>
             {/* New User Link - Only for Student */}
             {tabType === "student" && (
               <button
                 type="button"
                 className="forgot-password"
                 onClick={() => setShowRegistration(true)}
-                style={{ marginTop: '10px' }}
               >
                 New user? Register here
               </button>
@@ -488,19 +515,28 @@ export default function UserLogin() {
             <div className="tabs-container">
               <button
                 className={`tab-button ${activeTab === 'student' ? 'active' : ''}`}
-                onClick={() => setActiveTab('student')}
+                onClick={() => {
+                  setActiveTab('student');
+                  navigate('/student/login');
+                }}
               >
                 Student
               </button>
               <button
                 className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
-                onClick={() => setActiveTab('admin')}
+                onClick={() => {
+                  setActiveTab('admin');
+                  navigate('/admin/login');
+                }}
               >
                 Admin
               </button>
               <button
                 className={`tab-button ${activeTab === 'faculty' ? 'active' : ''}`}
-                onClick={() => setActiveTab('faculty')}
+                onClick={() => {
+                  setActiveTab('faculty');
+                  navigate('/faculty/login');
+                }}
               >
                 Faculty Officer
               </button>

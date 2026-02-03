@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { clearAdminAuth } from "../../../utils/auth";
 import axios from "axios";
 import { 
   User, 
@@ -47,7 +48,7 @@ export const AdminSettings = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       if (!token) return;
 
       const res = await axios.get("http://localhost:5000/api/admin/auth/me", {
@@ -85,7 +86,7 @@ export const AdminSettings = () => {
 
     try {
       setSaving(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       const res = await axios.put("http://localhost:5000/api/admin/auth/update-profile", {
         name: name.trim()
       }, {
@@ -126,8 +127,9 @@ export const AdminSettings = () => {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.clear();
-      navigate("/UserLogin", { replace: true });
+      // 🔐 Clear ONLY admin auth
+      clearAdminAuth();
+      navigate("/admin/login", { replace: true });
     }
   };
 

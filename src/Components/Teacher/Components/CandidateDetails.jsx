@@ -112,7 +112,7 @@ const CandidateDetails = () => {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       if (!token) {
         alert("Session expired. Please login again.");
         return;
@@ -168,7 +168,7 @@ const CandidateDetails = () => {
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
         if (!token) {
           setError("Session expired. Please login again.");
           return;

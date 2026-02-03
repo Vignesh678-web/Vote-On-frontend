@@ -26,6 +26,7 @@ export default function DashboardHome() {
       color: "green",
     },
   ]);
+  const [electionsList, setElectionsList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function DashboardHome() {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("usertoken") || localStorage.getItem("token");
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch ONLY student-relevant elections (Active, Scheduled, Completed)
@@ -53,6 +54,7 @@ export default function DashboardHome() {
       const activeElections = elections.filter(e => e.status === 'Active').length;
       const completedElections = elections.filter(e => e.status === 'Completed').length;
 
+      setElectionsList(elections);
       setStats([
         {
           icon: Users,
@@ -184,6 +186,71 @@ export default function DashboardHome() {
               </div>
             );
           })}
+        </div>
+
+        {/* Dynamic Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+          {/* Live Elections List */}
+          <div className="lg:col-span-2 bg-gray-800/10 backdrop-blur-md rounded-2xl border border-green-500/20 p-6 sm:p-8">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <BarChart3 className="text-green-400" size={20} />
+              Recent Available Polls
+            </h3>
+            
+            <div className="space-y-4">
+              {electionsList.length > 0 ? (
+                electionsList.slice(0, 5).map((election, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-5 bg-black/40 rounded-xl border border-white/5 hover:border-green-500/30 transition-all group">
+                    <div>
+                      <h4 className="text-white font-semibold group-hover:text-green-400 transition-colors">{election.electionName}</h4>
+                      <p className="text-sm text-gray-500">{election.type === 'class' ? 'Class Election' : 'College Election'}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${election.status === 'Active' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}>
+                        {election.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-800 rounded-2xl">
+                   <Users className="mx-auto mb-3 opacity-20" size={48} />
+                   <p>No elections currently listed for you.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Guidelines / Quick Info */}
+          <div className="bg-gray-800/10 backdrop-blur-md rounded-2xl border border-purple-500/20 p-6 sm:p-8">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <CheckCircle className="text-purple-400" size={20} />
+              Voting Guidelines
+            </h3>
+            <ul className="space-y-5">
+              {[
+                "Navigate to 'Class Vote' or 'College Vote'.",
+                "Explore nominated candidate profiles.",
+                "Cast your vote with the 'Vote' button.",
+                "Verify your vote if prompted.",
+                "Track results in the 'Results' tab."
+              ].map((step, i) => (
+                <li key={i} className="flex gap-4 text-sm text-gray-400 leading-relaxed">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs ring-1 ring-purple-500/30">
+                    {i + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ul>
+            
+            <div className="mt-10 p-5 bg-purple-500/5 rounded-2xl border border-purple-500/20 text-xs text-purple-300 leading-relaxed">
+              <p className="flex items-center gap-2 mb-2 font-bold text-purple-400">
+                <Users size={14} /> SECURITY NOTICE
+              </p>
+              Your identity remains anonymous throughout the voting process. Ensure you have a stable connection before submitting.
+            </div>
+          </div>
         </div>
       </div>
     </div>

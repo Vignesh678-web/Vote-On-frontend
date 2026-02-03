@@ -3,7 +3,10 @@ const API_BASE_URL = 'http://localhost:5000/api';
 
 // Get auth token from localStorage
 const getAuthToken = () => {
-  return localStorage.getItem('token');
+  return localStorage.getItem('usertoken') || 
+         localStorage.getItem('admintoken') || 
+         localStorage.getItem('teachertoken') ||
+         localStorage.getItem('token');
 };
 
 // Create headers with auth token

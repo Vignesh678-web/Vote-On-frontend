@@ -35,7 +35,7 @@ export default function ManageElections() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch elections
@@ -56,7 +56,7 @@ export default function ManageElections() {
   const handleCreateElection = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/teacher/class-election/create",
         formData,
@@ -98,7 +98,7 @@ export default function ManageElections() {
   const handleUpdateElection = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.put(
         `http://localhost:5000/api/teacher/class-election/${selectedElection._id}`,
         formData,
@@ -130,7 +130,7 @@ export default function ManageElections() {
   const handleAddCandidate = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.post(
         "http://localhost:5000/api/teacher/class-election/add-candidate",
         {
@@ -151,7 +151,7 @@ export default function ManageElections() {
   const handleStartElection = async (electionId) => {
     if (!window.confirm("Are you sure you want to start this election? Students will be able to vote.")) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(
         `http://localhost:5000/api/teacher/class-election/${electionId}/start`,
         {},
@@ -166,7 +166,7 @@ export default function ManageElections() {
   const handleEndElection = async (electionId) => {
     if (!window.confirm("Are you sure you want to end this election and declare the winner?")) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(
         `http://localhost:5000/api/teacher/class-election/${electionId}/end`,
         {},
@@ -181,7 +181,7 @@ export default function ManageElections() {
   const handleDeleteElection = async (electionId) => {
     if (!window.confirm("ARE YOU ABSOLUTELY SURE? This will permanently delete this election and all its voting records. This action cannot be undone.")) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.delete(
         `http://localhost:5000/api/teacher/class-election/${electionId}`,
         { headers: { Authorization: `Bearer ${token}` } }

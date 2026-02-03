@@ -22,7 +22,7 @@ const [saving, setSaving] = useState(false);
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
         if (!token) {
           throw new Error("Unauthorized: No token found");
@@ -223,7 +223,7 @@ const [saving, setSaving] = useState(false);
 
         setSaving(true);
 
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
         await axios.post(
           "http://localhost:5000/api/teacher/attendance",
@@ -305,7 +305,7 @@ const [saving, setSaving] = useState(false);
 
               setSaving(true);
 
-              const token = localStorage.getItem("token");
+              const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
               await axios.post(
                 "http://localhost:5000/api/teacher/update-attendance",

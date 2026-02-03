@@ -19,7 +19,7 @@ export default function CandidateParticipationTracker() {
   const fetchCandidates = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       const res = await axios.get("http://localhost:5000/api/admin/candidates/get-candidates", {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -36,7 +36,7 @@ export default function CandidateParticipationTracker() {
 
   const handleApprove = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(`http://localhost:5000/api/admin/candidates/approve/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -49,7 +49,7 @@ export default function CandidateParticipationTracker() {
   const handleReject = async (id) => {
     if (!window.confirm("Are you sure you want to reject this candidate? They will be removed from candidates list.")) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.patch(`http://localhost:5000/api/admin/candidates/reject/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -71,7 +71,7 @@ export default function CandidateParticipationTracker() {
   const bulkApprove = async () => {
     if (selectedIds.size === 0) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       const ids = Array.from(selectedIds);
       // Sequential approvals (better to have bulk endpoint, but this works)
       for (const id of ids) {

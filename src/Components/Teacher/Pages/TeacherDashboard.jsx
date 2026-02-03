@@ -24,6 +24,16 @@ const FacultyOfficerDashboard = ({
   profileInputRef,
   handleProfileImageUpload,
 }) => {
+  // 🔄 RECOVER STATE FROM LOCALSTORAGE ON REFRESH
+  // Props are lost on refresh because App.jsx doesn't pass them, so we hydrate from storage.
+  const storedTeacher = JSON.parse(localStorage.getItem("teacher") || "{}");
+  const effectiveName = teacherName || storedTeacher.Name || "Faculty Officer";
+  const effectiveRole = teacherRole || storedTeacher.role || "Officer";
+  const effectiveClass = classInfo || {
+    className: storedTeacher.department || "Class A",
+    academicYear: "2025"
+  };
+
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -31,7 +41,7 @@ const FacultyOfficerDashboard = ({
   const [loadingStudents, setLoadingStudents] = useState(true);
 
   const [dynamicCandidates, setDynamicCandidates] = useState([]);
-  const [dynamicClassInfo, setDynamicClassInfo] = useState(classInfo);
+  const [dynamicClassInfo, setDynamicClassInfo] = useState(effectiveClass);
   const [dynamicElection, setDynamicElection] = useState(election);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -42,7 +52,7 @@ const FacultyOfficerDashboard = ({
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
         const res = await axios.get(
           "http://localhost:5000/api/teacher/students",
           {
@@ -73,7 +83,7 @@ const FacultyOfficerDashboard = ({
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
         const res = await axios.get(
           "http://localhost:5000/api/admin/candidates/get-candidates",
           {
@@ -112,8 +122,8 @@ const FacultyOfficerDashboard = ({
       setDynamicClassInfo({
         totalStudents: students.length,
         eligibleVoters: eligibleCount,
-        className: classInfo?.className || "Class A",
-        academicYear: classInfo?.academicYear || "2025",
+        className: effectiveClass?.className || "Class A",
+        academicYear: effectiveClass?.academicYear || "2025",
       });
     }
   }, [students]);
@@ -171,7 +181,7 @@ const FacultyOfficerDashboard = ({
   useEffect(() => {
     const fetchAllElections = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
         const res = await axios.get("http://localhost:5000/api/teacher/class-election", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -337,9 +347,9 @@ const FacultyOfficerDashboard = ({
       case "settings":
         return (
           <Settings
-            teacherName={teacherName}
-            teacherRole={teacherRole}
-            classInfo={classInfo}
+            teacherName={effectiveName}
+            teacherRole={effectiveRole}
+            classInfo={effectiveClass}
           />
         );
 
@@ -361,9 +371,9 @@ const FacultyOfficerDashboard = ({
         <Header
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
-          teacherName={teacherName}
-          teacherRole={teacherRole}
-          classInfo={classInfo}
+          teacherName={effectiveName}
+          teacherRole={effectiveRole}
+          classInfo={effectiveClass}
           profileImage={profileImage}
           profileInputRef={profileInputRef}
           handleProfileImageUpload={handleProfileImageUpload}

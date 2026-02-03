@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import './App.css'
 import UserLogin from './Components/User/Pages/UserLogin'
 import Otp from './Components/User/Pages/Otp'
@@ -8,23 +8,83 @@ import VotePage from './Components/Student/Pages/VotePage'
 import AdminDashboard from './Components/Admin/Pages/AdminDashboard'
 import LandingPage from './Components/LandingPage/Pages/LandingPage'
 import CandidateDetails from './Components/Teacher/Components/CandidateDetails'
+import ProtectedRoute from './Components/Common/ProtectedRoute'
 
+import { getRoleFromToken } from './utils/auth'
+
+const LoginRedirect = ({ defaultTab = 'student', allowAccess = false }) => {
+  const storedRole = localStorage.getItem('role');
+  
+  // Resolve token based on stored role or fallback
+  const token = (storedRole === 'student' ? localStorage.getItem('usertoken') : null) || 
+                (storedRole === 'admin'   ? localStorage.getItem('admintoken') : null) || 
+                (storedRole === 'teacher' ? localStorage.getItem('teachertoken') : null) ||
+                localStorage.getItem('usertoken') || 
+                localStorage.getItem('admintoken') || 
+                localStorage.getItem('teachertoken') ||
+                localStorage.getItem('token');
+  
+  // Extract actual role from token payload
+  const tokenRole = getRoleFromToken(token);
+  const effectiveRole = tokenRole || storedRole;
+
+  // Sync role if mismatch detected
+  if (tokenRole && storedRole !== tokenRole) {
+    localStorage.setItem('role', tokenRole);
+  }
+  
+  // If allowAccess is true (role-specific routes), show login form even if authenticated
+  if (!allowAccess && token && effectiveRole) {
+    if (effectiveRole === 'student') return <Navigate to="/studentDashboard" replace />;
+    if (effectiveRole === 'admin') return <Navigate to="/adminDashboard" replace />;
+    if (effectiveRole === 'teacher') return <Navigate to="/teacherDashboard" replace />;
+  }
+  return <UserLogin initialTab={defaultTab} />;
+};
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<UserLogin />} />
-        <Route path="/UserLogin" element={<UserLogin />} />
+        <Route path="/" element={<LoginRedirect />} />
+        <Route path="/UserLogin" element={<LoginRedirect />} />
+        <Route path="/student/login" element={<LoginRedirect defaultTab="student" allowAccess={true} />} />
+        <Route path="/admin/login" element={<LoginRedirect defaultTab="admin" allowAccess={true} />} />
+        <Route path="/faculty/login" element={<LoginRedirect defaultTab="faculty" allowAccess={true} />} />
         <Route path="/OtpLogin" element={<Otp />} />
-        <Route path="/teacherDashboard" element={<FacultyOfficerDashboard />} />
-        <Route path="/studentDashboard" element={<StudentDashboard />} />
-        <Route path="/VotePage" element={<VotePage />} /> 
-        <Route path="/adminDashboard" element={<AdminDashboard />} />
-        <Route path='/LandingPage' element={<LandingPage />} />
-        <Route path="/candidates/:studentId" element={<CandidateDetails  />} />
-
         
+        {/* Protected Routes */}
+        <Route path="/teacherDashboard" element={
+          <ProtectedRoute allowedRoles={['teacher']}>
+            <FacultyOfficerDashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/studentDashboard" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentDashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/VotePage" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <VotePage />
+          </ProtectedRoute>
+        } /> 
+        
+        <Route path="/adminDashboard" element={
+          <ProtectedRoute allowedRoles={['admin', 'teacher']}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/candidates/:studentId" element={
+          <ProtectedRoute allowedRoles={['teacher', 'admin']}>
+            <CandidateDetails />
+          </ProtectedRoute>
+        } />
+
+        <Route path='/LandingPage' element={<LandingPage />} />
       </Routes>
     </>
   )

@@ -21,7 +21,7 @@ export default function Elections({ initialType = null, initialTab = "ongoing" }
         setError(null);
 
         // Verify token exists
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('usertoken') || localStorage.getItem('token');
         if (!token) {
           setError('Authentication required. Please log in again.');
           console.error('[Elections] No auth token found');

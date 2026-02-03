@@ -23,7 +23,7 @@ const ElectionMonitor = () => {
   const fetchElections = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       const res = await axios.get("http://localhost:5000/api/elections", {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -39,7 +39,7 @@ const ElectionMonitor = () => {
   const handleCreateElection = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.post("http://localhost:5000/api/elections/create", {
         ...formData,
         type: 'college'
@@ -56,7 +56,7 @@ const ElectionMonitor = () => {
 
   const handleStartElection = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.put(`http://localhost:5000/api/elections/${id}/start`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -69,7 +69,7 @@ const ElectionMonitor = () => {
   const handleDeclareResult = async (id) => {
     if (!window.confirm("Confirm ending election and declaring result?")) return;
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
       await axios.put(`http://localhost:5000/api/elections/${id}/end`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });

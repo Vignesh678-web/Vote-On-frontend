@@ -55,7 +55,7 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
     }
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
       await axios.post(
         "http://localhost:5000/api/teacher/nominate",
@@ -93,7 +93,7 @@ const Students = ({ classInfo = {}, onNominateCandidate }) => {
 
   const fetchStudents = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("teachertoken") || localStorage.getItem("token");
 
       const res = await axios.get(
         "http://localhost:5000/api/teacher/students",
