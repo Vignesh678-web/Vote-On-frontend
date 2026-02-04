@@ -122,7 +122,30 @@ export const AdminSettings = () => {
       toast.error("New passwords do not match");
       return;
     }
-    toast.error("Password security update coming soon.");
+
+    try {
+      setSaving(true);
+      const token = localStorage.getItem("admintoken") || localStorage.getItem("teachertoken") || localStorage.getItem("token");
+      const res = await axios.put("http://localhost:5000/api/admin/auth/update-password", {
+        currentPassword,
+        newPassword
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data.success) {
+        toast.success("Password updated successfully");
+        // Clear password fields
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (err) {
+      console.error("Update password error:", err);
+      toast.error(err.response?.data?.message || "Failed to update password");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogout = () => {
@@ -256,10 +279,11 @@ export const AdminSettings = () => {
 
             <button 
               type="submit"
-              className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-2xl transition-all text-xs uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-2"
+              disabled={saving}
+              className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-2xl transition-all text-xs uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <Shield className="w-4 h-4" />
-              Update Credentials
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+              {saving ? "Updating..." : "Update Credentials"}
             </button>
           </form>
         </div>

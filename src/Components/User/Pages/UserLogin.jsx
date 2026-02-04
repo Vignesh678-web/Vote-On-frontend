@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import "../Components/Styles/Login.css"
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -115,15 +116,15 @@ export default function UserLogin({ initialTab = 'student' }) {
   const handleRegistrationSubmit = () => {
     // Validate all fields
     if (!registrationData.name.trim()) {
-      alert("Name is required");
+      toast.error("Name is required");
       return;
     }
     if (!registrationData.admissionNumber.trim()) {
-      alert("Admission number is required");
+      toast.error("Admission number is required");
       return;
     }
     if (!registrationData.email.trim()) {
-      alert("Email is required");
+      toast.error("Email is required");
       return;
     }
     // if (!registrationData.attendancePercentage.trim()) {
@@ -149,7 +150,7 @@ export default function UserLogin({ initialTab = 'student' }) {
           navigate("/OtpLogin", {
             state: { admissionNumber: registrationData.admissionNumber },
           });
-          alert("Registration successful! You can now login.");
+          toast.success("Registration successful! Verify your OTP to login.");
 
           setShowRegistration(false);
           // Reset registration form
@@ -160,12 +161,12 @@ export default function UserLogin({ initialTab = 'student' }) {
             attendancePercentage: ''
           });
         } else {
-          alert(response.data?.message || "Registration failed");
+          toast.error(response.data?.message || "Registration failed");
         }
       })
       .catch((error) => {
         console.error("Registration error:", error);
-        alert(
+        toast.error(
           error.response?.data?.message ||
           error.message ||
           "Registration failed"
@@ -178,17 +179,17 @@ export default function UserLogin({ initialTab = 'student' }) {
 
     // Basic validation
     if (tab === "student" && (!data.admissionNumber || !data.password)) {
-      alert("Admission number and password are required");
+      toast.error("Admission number and password are required");
       return;
     }
 
     if (tab === "admin" && (!data.adminId || !data.password)) {
-      alert("Admin ID and password are required");
+      toast.error("Admin ID and password are required");
       return;
     }
 
     if (tab === "faculty" && (!data.facultyId || !data.password)) {
-      alert("Faculty Officer ID and password are required");
+      toast.error("Faculty Officer ID and password are required");
       return;
     }
 
@@ -207,7 +208,7 @@ export default function UserLogin({ initialTab = 'student' }) {
       console.log("[LOGIN] Response:", res);
 
       if (!res || res.success === false) {
-        alert(res?.message || "Login failed");
+        toast.error(res?.message || "Login failed");
         return;
       }
 
@@ -234,7 +235,7 @@ export default function UserLogin({ initialTab = 'student' }) {
 
       // 🔐 SAVE ROLE-SPECIFIC TOKEN
       if (!res.token) {
-        alert("No token received from server");
+        toast.error("No token received from server");
         return;
       }
 
@@ -296,7 +297,7 @@ export default function UserLogin({ initialTab = 'student' }) {
 
     } catch (error) {
       console.error("Login error:", error);
-      alert(
+      toast.error(
         error.response?.data?.message ||
         error.message ||
         "Something went wrong"
@@ -410,12 +411,14 @@ export default function UserLogin({ initialTab = 'student' }) {
     const tabTitles = {
       student: 'Student Login',
       admin: 'Admin Login',
-      faculty: 'Faculty Officer Login'
+      returning: 'Returning Officer Login',
+      teacher: 'Teacher Login'
     };
     const buttonLabels = {
       student: "Student login",
       admin: "Admin Login",
-      faculty: "Faculty Officer Login"
+      returning: "Returning Officer Login",
+      teacher: "Teacher Login"
     };
 
     const placeholders = {

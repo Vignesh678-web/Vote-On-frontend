@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
+import toast from 'react-hot-toast';
+
 const Otp = () => {
 
   const Navigate = useNavigate();
@@ -178,7 +180,7 @@ const handleStudentVerify = async () => {
     setIsVerified(false);
     inputRefs.current[0].focus();
     // Here you would typically trigger the resend OTP API
-    alert('OTP resent successfully!');
+    toast.success('OTP resent successfully!');
   };
 
   const handleReset = () => {

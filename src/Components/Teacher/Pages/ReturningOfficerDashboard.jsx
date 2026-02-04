@@ -5,8 +5,6 @@ import { Trophy } from "lucide-react";
 import Header from "../Components/Header";
 import Sidebar from "../Components/Sidebar";
 import Overview from "../Components/Overview";
-import MyStudent from "../Components/Students";
-import ManageAttendance from "../Components/Attendance";
 import Candidates from "../Components/Candidates";
 import ManageElections from "../Components/ManageElections";
 import ManageCollegeElections from "../Components/ManageCollegeElections";
@@ -217,12 +215,6 @@ const ReturningOfficerDashboard = ({
             election={dynamicElection}
           />
         );
-
-      case "students":
-        return <MyStudent students={students} />;
-
-      case "attendance":
-        return <ManageAttendance students={students} />;
 
       case "candidates":
         return <CandidateApproval />;

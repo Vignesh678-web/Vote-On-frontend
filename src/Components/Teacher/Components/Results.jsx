@@ -29,11 +29,23 @@ const Results = ({ election, candidates }) => {
 
   const totalVotes = processedResults.reduce((sum, r) => sum + r.votes, 0);
 
+  const votesEqual = processedResults.length >= 2 && processedResults[0].votes > 0 && processedResults[0].votes === processedResults[1].votes;
+  const isResolvedTie = (election?.status === 'Completed' || election?.winner) && votesEqual;
+
   processedResults.forEach((r, index) => {
     r.rank = index + 1;
     r.percentage = totalVotes > 0 ? parseFloat((r.votes / totalVotes) * 100).toFixed(1) : 0;
-    // Highlight first place as winner (or use election.winner ID if it exists and matches)
-    r.isWinner = index === 0 && r.votes > 0;
+    
+    // Determine winner: Must be in first place, have votes, and NOT be tied with the next person
+    if (election?.winner) {
+      // If backend already declared a winner, use that
+      const winnerId = election.winner._id || election.winner;
+      r.isWinner = r.id === winnerId;
+    } else {
+      // Projected winner logic
+      r.isWinner = !votesEqual && index === 0 && r.votes > 0;
+    }
+    r.isTied = votesEqual && r.votes === processedResults[0].votes;
   });
 
   const results = processedResults;
@@ -62,8 +74,12 @@ const Results = ({ election, candidates }) => {
                 {election?.title || 'ELECTION RESULTS'}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${election?.status === 'Completed' ? 'bg-purple-500/20 text-purple-400' : 'bg-green-500/20 text-green-400'}`}>
-                  {election?.status || 'LIVE'}
+                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${
+                  election?.status === 'Completed' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 
+                  election?.status === 'Tie' ? 'bg-orange-500/20 text-orange-400 animate-pulse border border-orange-500/30' :
+                  'bg-green-500/20 text-green-400 border border-green-500/30'
+                }`}>
+                  {election?.status === 'Tie' ? 'DEADLOCK' : (election?.status || 'LIVE')}
                 </span>
                 <p className="text-gray-500 text-sm font-medium">| {election?.position || 'Academic Poll'}</p>
               </div>
@@ -77,8 +93,14 @@ const Results = ({ election, candidates }) => {
             </div>
             <div className="pl-6 text-center font-mono">
               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 font-sans">Status</p>
-              <p className={`text-sm font-bold uppercase ${election?.status === 'Completed' ? 'text-purple-400' : 'text-green-400'}`}>
-                {election?.status === 'Completed' ? 'Final' : 'Ongoing'}
+              <p className={`text-sm font-bold uppercase ${
+                election?.status === 'Completed' ? 'text-purple-400' : 
+                election?.status === 'Tie' ? 'text-orange-400' :
+                'text-green-400'
+              }`}>
+                {election?.status === 'Completed' ? 'Final' : 
+                 election?.status === 'Tie' ? 'Deadlock' :
+                 'Ongoing'}
               </p>
             </div>
           </div>
@@ -92,14 +114,23 @@ const Results = ({ election, candidates }) => {
         <div className="lg:col-span-4 space-y-6">
           <div className={`p-8 rounded-3xl border-2 transition-all duration-500 ${results[0]?.isWinner ? 'bg-linear-to-br from-yellow-500/10 to-transparent border-yellow-500/40 shadow-[0_0_50px_rgba(234,179,8,0.1)]' : 'bg-gray-900 border-gray-800'}`}>
             <div className="flex justify-between items-start mb-6">
-              <Award className={`${results[0]?.isWinner ? 'text-yellow-400' : 'text-gray-600'}`} size={40} />
+              <Award className={`${results.some(r => r.isWinner) ? 'text-yellow-400' : (votesEqual && election?.status !== 'Completed' ? 'text-orange-400' : 'text-gray-600')}`} size={40} />
               {results.length > 0 && results[0].votes > 0 && (
-                <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-[10px] font-black tracking-widest animate-bounce">LEADING</span>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${
+                  (votesEqual && !results.some(r => r.isWinner)) ? 'bg-orange-500 text-black' : 'bg-yellow-500 text-black animate-bounce'
+                }`}>
+                  {isResolvedTie ? 'WINNER (TOSS)' : ((votesEqual && !results.some(r => r.isWinner)) ? 'TIED' : 'LEADING')}
+                </span>
               )}
             </div>
-            <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em] mb-2">Projected Winner</p>
+            <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em] mb-2">
+              {isResolvedTie ? "Resolution Outcome" : (votesEqual && !results.some(r => r.isWinner) ? "Voting Deadlock" : "Projected Winner")}
+            </p>
             <h3 className="text-3xl font-black text-white tracking-tighter mb-4">
-              {results.length > 0 && results[0].votes > 0 ? results[0].name : "Decision Pending"}
+              {results.length > 0 && results[0].votes > 0 
+                ? (results.find(r => r.isWinner)?.name || (votesEqual ? `${results.filter(r => r.isTied).length} Candidates` : results[0].name))
+                : "Decision Pending"
+              }
             </h3>
             {results.length > 0 && results[0].votes > 0 && (
               <div className="space-y-4">
@@ -139,8 +170,11 @@ const Results = ({ election, candidates }) => {
             {results.map((result, index) => (
               <div
                 key={result.id}
-                className={`group relative bg-gray-900 border transition-all duration-300 rounded-2xl p-5 flex items-center gap-6 ${result.isWinner ? 'border-yellow-500/30 bg-yellow-500/[0.02]' : 'border-white/5 hover:border-green-500/30'
-                  }`}
+                className={`group relative bg-gray-900 border transition-all duration-300 rounded-2xl p-5 flex items-center gap-6 ${
+                  result.isWinner ? 'border-yellow-500/30 bg-yellow-500/[0.02]' : 
+                  result.isTied ? 'border-orange-500/30 bg-orange-500/[0.02]' :
+                  'border-white/5 hover:border-green-500/30'
+                }`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shrink-0 transition-transform group-hover:scale-110 ${result.isWinner ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' :
                     index === 1 ? 'bg-gray-200 text-black' :

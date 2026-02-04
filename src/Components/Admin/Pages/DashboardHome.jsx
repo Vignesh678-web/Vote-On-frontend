@@ -25,7 +25,7 @@ import {
   Pie
 } from 'recharts';
 
-export const DashboardHome = ({ teachers, elections, results }) => {
+export const DashboardHome = ({ teachers, elections, results, setActiveSection }) => {
   // 🔹 DATA PREPARATION
   const stats = useMemo(() => ({
     totalOfficers: teachers.length,
@@ -246,7 +246,10 @@ export const DashboardHome = ({ teachers, elections, results }) => {
                 <h4 className="text-xl font-bold text-white mb-2">Schedule Snapshot</h4>
                 <p className="text-slate-400 text-xs leading-relaxed">View all upcoming institutional ballots and scheduled election cycles.</p>
               </div>
-              <button className="mt-8 w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-2xl transition-all shadow-xl shadow-emerald-500/10 text-xs uppercase tracking-[0.2em]">
+              <button 
+                onClick={() => setActiveSection('calendar')}
+                className="mt-8 w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-2xl transition-all shadow-xl shadow-emerald-500/10 text-xs uppercase tracking-[0.2em]"
+              >
                 View Calendar
               </button>
            </div>
@@ -257,7 +260,10 @@ export const DashboardHome = ({ teachers, elections, results }) => {
                 <h4 className="text-xl font-bold text-white mb-2">Security Hub</h4>
                 <p className="text-slate-400 text-xs leading-relaxed">Monitor real-time audit logs and validator statuses across all modules.</p>
               </div>
-              <button className="mt-8 w-full py-4 bg-blue-500 hover:bg-blue-400 text-black font-black rounded-2xl transition-all shadow-xl shadow-blue-500/10 text-xs uppercase tracking-[0.2em]">
+              <button 
+                onClick={() => setActiveSection('auditLogs')}
+                className="mt-8 w-full py-4 bg-blue-500 hover:bg-blue-400 text-black font-black rounded-2xl transition-all shadow-xl shadow-blue-500/10 text-xs uppercase tracking-[0.2em]"
+              >
                 Audit Center
               </button>
            </div>

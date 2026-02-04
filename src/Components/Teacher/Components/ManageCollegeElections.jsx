@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Vote, Plus, Play, Square, UserCheck, Calendar, Trophy, AlertCircle, Search } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function ManageCollegeElections() {
   const [elections, setElections] = useState([]);
@@ -64,9 +65,9 @@ export default function ManageCollegeElections() {
         minAttendanceRequired: 75
       });
       fetchData();
-      alert("College election created successfully!");
+      toast.success("College election created successfully!");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to create election");
+      toast.error(err.response?.data?.message || "Failed to create election");
     }
   };
 
@@ -83,9 +84,9 @@ export default function ManageCollegeElections() {
       );
       setShowAddCandidateModal(false);
       fetchData();
-      alert("Candidate added to college election successfully!");
+      toast.success("Candidate added to college election successfully!");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to add candidate");
+      toast.error(err.response?.data?.message || "Failed to add candidate");
     }
   };
 
@@ -99,8 +100,9 @@ export default function ManageCollegeElections() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchData();
+      toast.success("College election started!");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to start election");
+      toast.error(err.response?.data?.message || "Failed to start election");
     }
   };
 
@@ -114,8 +116,9 @@ export default function ManageCollegeElections() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchData();
+      toast.success("College election ended successfully!");
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to end election");
+      toast.error(err.response?.data?.message || "Failed to end election");
     }
   };
 
@@ -254,7 +257,11 @@ export default function ManageCollegeElections() {
                   {election.status === 'Completed' && election.winner && (
                     <div className="bg-yellow-500/10 border border-yellow-500/30 p-6 rounded-2xl text-center shadow-xl shadow-yellow-500/5">
                       <Trophy size={40} className="text-yellow-500 mx-auto mb-3" />
-                      <p className="text-yellow-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">College Representative</p>
+                      <p className="text-yellow-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                        {election.candidates.filter(c => c.votesCount === election.candidates.find(wc => (wc.student?._id || wc.student) === (election.winner?._id || election.winner))?.votesCount).length > 1 
+                          ? 'College Representative (Via Toss)' 
+                          : 'College Representative'}
+                      </p>
                       <p className="text-white font-black text-xl tracking-tight leading-tight">{election.winner.name}</p>
                       <p className="text-gray-500 text-[10px] mt-2 font-bold uppercase">{election.winner.className} {election.winner.section}</p>
                     </div>

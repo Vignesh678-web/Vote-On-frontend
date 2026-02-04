@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { CheckCircle, XCircle } from "lucide-react";
+import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 
 const Attendance = () => {
@@ -217,7 +218,7 @@ const [saving, setSaving] = useState(false);
         const value = Number(attendanceValue);
 
         if (value < 0 || value > 100) {
-          alert("Attendance must be between 0 and 100");
+          toast.error("Attendance must be between 0 and 100");
           return;
         }
 
@@ -248,8 +249,9 @@ const [saving, setSaving] = useState(false);
         );
 
         setIsAddModalOpen(false);
+        toast.success("Attendance added successfully");
       } catch (err) {
-        alert(err.response?.data?.message || "Failed to add attendance");
+        toast.error(err.response?.data?.message || "Failed to add attendance");
       } finally {
         setSaving(false);
       }
@@ -299,7 +301,7 @@ const [saving, setSaving] = useState(false);
               const value = Number(attendanceValue);
 
               if (value < 0 || value > 100) {
-                alert("Attendance must be between 0 and 100");
+                toast.error("Attendance must be between 0 and 100");
                 return;
               }
 
@@ -330,8 +332,9 @@ const [saving, setSaving] = useState(false);
               );
 
               setIsEditModalOpen(false);
+              toast.success("Attendance updated successfully");
             } catch (err) {
-              alert(
+              toast.error(
                 err.response?.data?.message ||
                 "Failed to update attendance"
               );

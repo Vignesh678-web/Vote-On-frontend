@@ -44,6 +44,8 @@ const LoginRedirect = ({ defaultTab = 'student', allowAccess = false }) => {
   return <UserLogin initialTab={defaultTab} />;
 };
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <>
@@ -95,6 +97,22 @@ function App() {
 
         <Route path='/LandingPage' element={<LandingPage />} />
       </Routes>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#0f172a',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)'
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     </>
   )
 }

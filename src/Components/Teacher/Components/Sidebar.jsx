@@ -41,8 +41,13 @@ const Sidebar = ({
 
   // Filter menu items based on role
   const menuItems = allMenuItems.filter(item => {
+    // Returning Officer specific views
     if (item.id === "elections" || item.id === "college-elections") {
       return role === "returning_officer";
+    }
+    // Remove "Class Students" and "Manage Attendance" for Returning Officer
+    if (item.id === "students" || item.id === "attendance") {
+      return role !== "returning_officer";
     }
     return true;
   });
